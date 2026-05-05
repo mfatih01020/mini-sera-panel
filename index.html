@@ -2,7 +2,6 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Sera Pro | Kontrol Merkezi</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -19,295 +18,151 @@
             --border: #30363d;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        header {
-            text-align: center;
-            padding: 20px 0;
-            background: linear-gradient(to bottom, #161b22, transparent);
-            border-radius: 0 0 20px 20px;
-        }
-
-        header h1 { margin: 0; color: var(--accent); font-size: 1.5rem; }
-        #live-time { font-size: 0.8rem; opacity: 0.6; }
-
-        /* Dashboard Izgarası */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 15px;
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: bold;
-            font-size: 0.9rem;
-            color: var(--accent);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-
-        /* Sensör Kutuları */
-        .sensor-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .sensor-item {
-            background: #0d1117;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid #21262d;
-        }
-
-        .sensor-label { font-size: 0.7rem; opacity: 0.6; display: block; margin-bottom: 5px; }
-        .sensor-value { font-size: 1.2rem; font-weight: bold; color: white; }
-
-        /* Kontrol Elemanları */
-        .control-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0d1117;
-            padding: 12px 15px;
-            border-radius: 12px;
-            margin-bottom: 5px;
-        }
-
-        .status-tag {
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 800;
-        }
-
-        .tag-on { background: rgba(63, 185, 80, 0.15); color: #3fb950; border: 1px solid #3fb950; }
-        .tag-off { background: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid #f85149; }
-
-        /* Butonlar */
-        .btn-group { display: flex; gap: 10px; }
+        body { font-family: sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; max-width: 400px; margin: auto; }
+        
+        /* Buton ve Yükleme Animasyonu Tasarımı */
         .btn {
-            flex: 1;
-            border: none;
-            border-radius: 10px;
+            width: 100%;
             padding: 12px;
+            border-radius: 10px;
+            border: none;
+            color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-            color: white;
-            font-size: 0.85rem;
-        }
-
-        .btn:active { transform: scale(0.96); }
-        .btn-blue { background: #1f6feb; }
-        .btn-green { background: #238636; }
-        .btn-red { background: #da3633; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-
-        /* Dozaj Giriş */
-        .dosage-item {
             display: flex;
-            gap: 10px;
             align-items: center;
-            margin-top: 5px;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+            margin-top: 10px;
         }
 
-        input[type="number"] {
-            width: 70px;
-            background: #0b0e14;
-            border: 1px solid var(--border);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
+        .btn:disabled {
+            background: #30363d !important;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
-        #dosage-msg { font-size: 0.75rem; text-align: center; color: var(--accent); }
+        /* Yükleme Dairesi (Spinner) Animasyonu */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none; /* Varsayılan olarak gizli */
+        }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading .spinner { display: block; }
+        .loading .btn-text { display: none; }
+
+        .btn-green { background: var(--green); }
+        .btn-red { background: var(--red); }
+        
+        .status-tag { padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; float: right; }
+        .tag-on { background: rgba(63, 185, 80, 0.1); color: #3fb950; border: 1px solid #3fb950; }
+        .tag-off { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid #f85149; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1><i class="fas fa-seedling"></i> SMART SERA PRO</h1>
-        <span id="live-time">Bağlanıyor...</span>
-    </header>
+<div class="card">
+    <h3><i class="fas fa- wind"></i> Sistem Kontrolü</h3>
+    
+    <div style="margin-bottom: 20px;">
+        <span>Pencere:</span> <span id="st_cam" class="status-tag tag-off">KAPALI</span>
+        <button id="btn_cam_ac" class="btn btn-green" onclick="komutGonder('cam_istek', 0, 'btn_cam_ac')">
+            <div class="spinner"></div>
+            <span class="btn-text">CAMI AÇ</span>
+        </button>
+        <button id="btn_cam_kapat" class="btn btn-red" onclick="komutGonder('cam_istek', 1, 'btn_cam_kapat')">
+            <div class="spinner"></div>
+            <span class="btn-text">CAMI KAPAT</span>
+        </button>
+    </div>
 
-    <div class="dashboard-grid">
-        
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-home"></i> SERA İÇİ (BME280)</span></div>
-            <div class="sensor-group">
-                <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span class="sensor-value" id="v_is">--</span></div>
-                <div class="sensor-item"><span class="sensor-label">NEM</span><span class="sensor-value" id="v_in">--</span></div>
-                <div class="sensor-item"><span class="sensor-label">BASINÇ</span><span class="sensor-value" id="v_ib">--</span></div>
-                <div class="sensor-item"><span class="sensor-label">TOPRAK NEMİ</span><span class="sensor-value" id="v_tn">--</span></div>
-            </div>
-        </div>
+    <hr style="border-color: var(--border);">
 
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-toggle-on"></i> ANA KONTROLLER</span></div>
-            
-            <div class="control-row">
-                <span>Pencere Durumu</span>
-                <span id="st_cam" class="status-tag tag-off">KAPALI</span>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-green" onclick="sendCmd('cam_istek', 0)">AÇ</button>
-                <button class="btn btn-red" onclick="sendCmd('cam_istek', 1)">KAPAT</button>
-            </div>
-
-            <div class="control-row">
-                <span>Fan Sistemi</span>
-                <span id="st_fan" class="status-tag tag-off">OFF</span>
-            </div>
-            <button class="btn btn-outline" onclick="toggleCmd('fan_istek')">FANI AÇ/KAPAT</button>
-
-            <div class="control-row">
-                <span>Ana Pompa</span>
-                <span id="st_pompa" class="status-tag tag-off">OFF</span>
-            </div>
-            <button class="btn btn-outline" onclick="toggleCmd('pompa_istek')">POMPAYI AÇ/KAPAT</button>
-        </div>
-
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-flask"></i> DOZAJ ÜNİTESİ</span></div>
-            <div id="dosage-msg">Sistem hazır.</div>
-            
-            <div class="dosage-item">
-                <input type="number" id="ml_a" value="10">
-                <button class="btn btn-blue" onclick="dozaj('a')">GÜBRE A GÖNDER</button>
-            </div>
-
-            <div class="dosage-item">
-                <input type="number" id="ml_b" value="10">
-                <button class="btn btn-blue" onclick="dozaj('b')">GÜBRE B GÖNDER</button>
-            </div>
-
-            <div class="dosage-item">
-                <input type="number" id="ml_ph" value="5">
-                <button class="btn btn-outline" onclick="dozaj('ph')">pH DÜZENLEYİCİ</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header"><span><i class="fas fa-tint"></i> SU VE DIŞ ANALİZ</span></div>
-            <div class="sensor-group">
-                <div class="sensor-item"><span class="sensor-label">DIŞ ISI</span><span class="sensor-value" id="v_ds">--</span></div>
-                <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span class="sensor-value" id="v_yg">YOK</span></div>
-                <div class="sensor-item"><span class="sensor-label">SU pH</span><span class="sensor-value" id="v_ph">--</span></div>
-                <div class="sensor-item"><span class="sensor-label">DEPO DOLULUK</span><span class="sensor-value" id="v_sd">--</span></div>
-            </div>
-        </div>
-
+    <div>
+        <span>Pompa:</span> <span id="st_pompa" class="status-tag tag-off">OFF</span>
+        <button id="btn_pompa_ac" class="btn btn-green" onclick="komutGonder('pompa_istek', 1, 'btn_pompa_ac')">
+            <div class="spinner"></div>
+            <span class="btn-text">POMPAYI ÇALIŞTIR</span>
+        </button>
+        <button id="btn_pompa_kapat" class="btn btn-red" onclick="komutGonder('pompa_istek', 0, 'btn_pompa_kapat')">
+            <div class="spinner"></div>
+            <span class="btn-text">POMPAYI DURDUR</span>
+        </button>
     </div>
 </div>
 
 <script>
-    // 1. FIREBASE BAĞLANTISI
+    // Firebase Yapılandırması
     const firebaseConfig = { databaseURL: "https://mini-sera-otomasyonum-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. KOMUT GÖNDERME FONKSİYONLARI
-    function sendCmd(path, val) { 
-        db.ref('kontroller/' + path).set(val); 
+    // Komut Gönderme ve Loading Başlatma
+    function komutGonder(path, val, btnId) {
+        const btn = document.getElementById(btnId);
+        btn.classList.add('loading'); // Spinner'ı göster
+        btn.disabled = true; // Tekrar basılmasını engelle
+        
+        db.ref('kontroller/' + path).set(val); // Firebase'e yaz
     }
 
-    function toggleCmd(path) {
-        db.ref('kontroller/' + path).once('value', s => {
-            db.ref('kontroller/' + path).set(s.val() == 1 ? 0 : 1);
-        });
-    }
-
-    function dozaj(tur) {
-        let ml = document.getElementById('ml_' + tur).value;
-        db.ref('kontroller/dozaj_' + tur + '_ml').set(parseInt(ml));
-        document.getElementById('dosage-msg').innerText = "⏳ " + tur.toUpperCase() + " komutu işleniyor...";
-    }
-
-    // 3. CANLI VERİLERİ DİNLE (SENSÖRLER)
-    db.ref('sensorler/canli').on('value', s => {
-        const v = s.val();
-        if(v) {
-            // İç Ortam
-            document.getElementById('v_is').innerText = v.ic_ortam.sicaklik + "°C";
-            document.getElementById('v_in').innerText = "%" + v.ic_ortam.nem;
-            document.getElementById('v_ib').innerText = v.ic_ortam.basinc;
-            
-            // Dış ve Su
-            document.getElementById('v_ds').innerText = v.dis_ortam.sicaklik + "°C";
-            document.getElementById('v_yg').innerText = v.dis_ortam.yagmur_durumu == 1 ? "YAĞIYOR" : "YOK";
-            document.getElementById('v_ph').innerText = v.su_sistemleri.ph_degeri;
-            document.getElementById('v_sd').innerText = "%" + v.su_sistemleri.depo_seviye_yuzde;
-            document.getElementById('v_tn').innerText = "%" + v.su_sistemleri.toprak_nem_yuzde;
-        }
-    });
-
-    // 4. GERÇEK DURUMLARI DİNLE (GERİ BESLEME)
+    // Durumları Dinle ve Loading Durumunu Bitir (Handshake)
     db.ref('durumlar').on('value', s => {
         const d = s.val();
-        if(d) {
-            // Cam Durumu
-            const cam = document.getElementById('st_cam');
-            cam.innerText = d.gercek_cam == 0 ? "AÇIK" : "KAPALI";
-            cam.className = d.gercek_cam == 0 ? "status-tag tag-on" : "status-tag tag-off";
+        if(!d) return;
 
-            // Fan Durumu
-            const fan = document.getElementById('st_fan');
-            fan.innerText = d.gercek_fan == 1 ? "ON" : "OFF";
-            fan.className = d.gercek_fan == 1 ? "status-tag tag-on" : "status-tag tag-off";
+        // Cam Geri Bildirimi
+        const camEtiket = document.getElementById('st_cam');
+        if(d.gercek_cam == 0) {
+            camEtiket.innerText = "AÇIK"; camEtiket.className = "status-tag tag-on";
+            btnYuklemeyiBitir('btn_cam_ac');
+        } else {
+            camEtiket.innerText = "KAPALI"; camEtiket.className = "status-tag tag-off";
+            btnYuklemeyiBitir('btn_cam_kapat');
+        }
 
-            // Pompa Durumu
-            const pompa = document.getElementById('st_pompa');
-            pompa.innerText = d.gercek_pompa == 1 ? "ON" : "OFF";
-            pompa.className = d.gercek_pompa == 1 ? "status-tag tag-on" : "status-tag tag-off";
-
-            // Dozaj Onay Mesajı
-            if(d.dozaj_onay !== "bekliyor") {
-                document.getElementById('dosage-msg').innerText = "✅ İşlem: " + d.dozaj_onay.toUpperCase();
-                setTimeout(() => { db.ref('durumlar/dozaj_onay').set("bekliyor"); }, 4000);
-            } else {
-                document.getElementById('dosage-msg').innerText = "Sistem komut bekliyor.";
-            }
+        // Pompa Geri Bildirimi
+        const pompaEtiket = document.getElementById('st_pompa');
+        if(d.gercek_pompa == 1) {
+            pompaEtiket.innerText = "ON"; pompaEtiket.className = "status-tag tag-on";
+            btnYuklemeyiBitir('btn_pompa_ac');
+        } else {
+            pompaEtiket.innerText = "OFF"; pompaEtiket.className = "status-tag tag-off";
+            btnYuklemeyiBitir('btn_pompa_kapat');
         }
     });
 
-    // Zamanı Güncelle
-    setInterval(() => {
-        document.getElementById('live-time').innerText = new Date().toLocaleString('tr-TR');
-    }, 1000);
+    function btnYuklemeyiBitir(btnId) {
+        const btn = document.getElementById(btnId);
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        
+        // Karşı butonu da temizle (Örn: Açıldıysa Kapat butonu da aktif kalmalı)
+        if(btnId.includes('cam')) {
+            document.getElementById('btn_cam_ac').classList.remove('loading');
+            document.getElementById('btn_cam_ac').disabled = false;
+            document.getElementById('btn_cam_kapat').classList.remove('loading');
+            document.getElementById('btn_cam_kapat').disabled = false;
+        }
+        if(btnId.includes('pompa')) {
+            document.getElementById('btn_pompa_ac').classList.remove('loading');
+            document.getElementById('btn_pompa_ac').disabled = false;
+            document.getElementById('btn_pompa_kapat').classList.remove('loading');
+            document.getElementById('btn_pompa_kapat').disabled = false;
+        }
+    }
 </script>
 
 </body>
