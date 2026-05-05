@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Sera Kontrol</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; width: 90%; max-width: 400px; }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #deff9a; }
+        .status-box { background: #334155; padding: 15px; border-radius: 12px; margin-bottom: 25px; }
+        .status-text { font-weight: bold; font-size: 20px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
+        .btn-open { background: #22c55e; color: white; }
+        .btn-close { background: #ef4444; color: white; }
+        button:active { transform: scale(0.95); }
+        .footer { margin-top: 20px; font-size: 12px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🌿 Sera Otomasyonu</h1>
+        
+        <div class="status-box">
+            <div style="font-size: 14px; color: #94a3b8; margin-bottom: 5px;">KÖYDEKİ CAMIN DURUMU</div>
+            <div id="durum" class="status-text">Bağlanıyor...</div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-open" onclick="gonder(0)">CAMI AÇ</button>
+            <button class="btn-close" onclick="gonder(1)">CAMI KAPAT</button>
+        </div>
+
+        <div class="footer">Cihaz: NodeMCU (ESP8266)</div>
+    </div>
+
+    <script>
+        // FIREBASE AYARLARIN
+        const firebaseConfig = {
+            databaseURL: "https://mini-sera-otomasyonum-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Şehirden Komut Gönder
+        function gonder(deger) {
+            db.ref('cam_durum').set(deger);
+        }
+
+        // Köyden Gelen Durumu Dinle
+        db.ref('gercek_durum').on('value', (snapshot) => {
+            const d = snapshot.val();
+            const durumEleman = document.getElementById('durum');
+            if(d == 0) {
+                durumEleman.innerText = "🔓 AÇIK";
+                durumEleman.style.color = "#22c55e";
+            } else {
+                durumEleman.innerText = "🔒 KAPALI";
+                durumEleman.style.color = "#ef4444";
+            }
+        });
+    </script>
+</body>
+</html>
