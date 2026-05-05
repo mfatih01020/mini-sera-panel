@@ -1,67 +1,175 @@
-<div class="card">
-    <div class="card-header"><span><i class="fas fa-vial"></i> DOZAJ POMPALARI</span></div>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Sera Pro | Kontrol Paneli</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <div class="control-row" style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <span>Gübre A Çözeltisi</span>
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <input type="number" id="ml_a" value="10" style="width: 50px; background: #0d1117; color: white; border: 1px solid var(--border); border-radius: 4px; padding: 5px;">
-                <span style="font-size: 0.8rem;">ml</span>
+    <style>
+        :root {
+            --bg: #0d1117; --card: #161b22; --accent: #58a6ff;
+            --green: #238636; --red: #da3633; --text: #c9d1d9; --border: #30363d;
+        }
+
+        body { font-family: -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
+        
+        header { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--accent); }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+        .sensor-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sensor-item { background: #0d1117; padding: 12px; border-radius: 10px; border: 1px solid #21262d; text-align: center; }
+        .sensor-label { font-size: 0.7rem; opacity: 0.6; display: block; }
+        .sensor-value { font-size: 1.1rem; font-weight: bold; }
+
+        .control-row { background: #0d1117; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #21262d; }
+        .btn-group { display: flex; gap: 8px; margin-top: 8px; }
+        
+        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn:disabled { opacity: 0.5; }
+        .btn-green { background: var(--green); }
+        .btn-red { background: var(--red); }
+        .btn-blue { background: var(--accent); }
+
+        .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading .spinner { display: block; margin-right: 8px; }
+        .loading .btn-text { opacity: 0.7; }
+
+        .status-tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 5px; }
+        .tag-on { background: rgba(56, 139, 253, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+        .tag-off { background: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid #f85149; }
+
+        input[type="number"] { width: 60px; background: #0b0e14; border: 1px solid var(--border); color: white; border-radius: 5px; padding: 5px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<header><h1><i class="fas fa-leaf"></i> SMART SERA PRO</h1><p id="live-time">...</p></header>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header"><span>İÇ ORTAM</span></div>
+        <div class="sensor-group">
+            <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">NEM</span><span id="v_in" class="sensor-value">--</span></div>
+        </div>
+        <div class="control-row" style="margin-top:15px;">
+            <div style="display:flex; justify-content:space-between;"><span>Cam: <span id="st_cam" class="status-tag tag-off">...</span></span></div>
+            <div class="btn-group">
+                <button id="btn_cam_ac" class="btn btn-green" onclick="sendCmd('cam_istek', 0, 'btn_cam_ac')"><div class="spinner"></div><span class="btn-text">AÇ</span></button>
+                <button id="btn_cam_kapat" class="btn btn-red" onclick="sendCmd('cam_istek', 1, 'btn_cam_kapat')"><div class="spinner"></div><span class="btn-text">KAPAT</span></button>
             </div>
         </div>
-        <button id="btn_dozaj_a" class="btn btn-blue" onclick="dozajKomut('dozaj_a_ml', 'ml_a', 'btn_dozaj_a')">
-            <div class="spinner"></div><span class="btn-text">GÖNDER</span>
-        </button>
     </div>
 
-    <div class="control-row" style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <span>Gübre B Çözeltisi</span>
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <input type="number" id="ml_b" value="10" style="width: 50px; background: #0d1117; color: white; border: 1px solid var(--border); border-radius: 4px; padding: 5px;">
-                <span style="font-size: 0.8rem;">ml</span>
+    <div class="card">
+        <div class="card-header"><span>DOZAJ SİSTEMİ</span></div>
+        
+        <div class="control-row">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label>Gübre A:</label>
+                <div><input type="number" id="val_a" value="10"> ml</div>
             </div>
+            <button id="btn_a" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="dozaj('dozaj_a_ml', 'val_a', 'btn_a')">
+                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+            </button>
         </div>
-        <button id="btn_dozaj_b" class="btn btn-blue" onclick="dozajKomut('dozaj_b_ml', 'ml_b', 'btn_dozaj_b')">
-            <div class="spinner"></div><span class="btn-text">GÖNDER</span>
-        </button>
+
+        <div class="control-row">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label>Gübre B:</label>
+                <div><input type="number" id="val_b" value="10"> ml</div>
+            </div>
+            <button id="btn_b" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="dozaj('dozaj_b_ml', 'val_b', 'btn_b')">
+                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+            </button>
+        </div>
+
+        <div class="control-row">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label>pH Düzen:</label>
+                <div><input type="number" id="val_ph" value="5"> ml</div>
+            </div>
+            <button id="btn_ph" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="dozaj('dozaj_ph_ml', 'val_ph', 'btn_ph')">
+                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+            </button>
+        </div>
     </div>
 
-    <div class="control-row" style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <span>pH Düşürücü / Yükseltici</span>
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <input type="number" id="ml_ph" value="5" style="width: 50px; background: #0d1117; color: white; border: 1px solid var(--border); border-radius: 4px; padding: 5px;">
-                <span style="font-size: 0.8rem;">ml</span>
+    <div class="card">
+        <div class="card-header"><span>SİSTEM ANALİZİ</span></div>
+        <div class="sensor-group">
+            <div class="sensor-item"><span class="sensor-label">SU pH</span><span id="v_ph" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">DEPO</span><span id="v_sd" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">DIŞ ISI</span><span id="v_ds" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span id="v_yg" class="sensor-value">--</span></div>
+        </div>
+        <div class="control-row" style="margin-top:15px;">
+            <span>Pompa: <span id="st_pompa" class="status-tag tag-off">...</span></span>
+            <div class="btn-group">
+                <button id="btn_p_ac" class="btn btn-green" onclick="sendCmd('pompa_istek', 1, 'btn_p_ac')"><div class="spinner"></div><span class="btn-text">BAŞLAT</span></button>
+                <button id="btn_p_kap" class="btn btn-red" onclick="sendCmd('pompa_istek', 0, 'btn_p_kap')"><div class="spinner"></div><span class="btn-text">DURDUR</span></button>
             </div>
         </div>
-        <button id="btn_dozaj_ph" class="btn btn-blue" onclick="dozajKomut('dozaj_ph_ml', 'ml_ph', 'btn_dozaj_ph')">
-            <div class="spinner"></div><span class="btn-text">GÖNDER</span>
-        </button>
     </div>
 </div>
 
 <script>
-    // Dozaj için özel fonksiyon (Miktarı inputtan okur)
-    function dozajKomut(path, inputId, btnId) {
-        const miktar = document.getElementById(inputId).value;
-        const btn = document.getElementById(btnId);
-        
-        btn.classList.add('loading');
-        btn.disabled = true;
-        
-        // Önce miktarı yaz, sonra onay beklemek için durumu 'bekliyor' yap
-        db.ref('kontroller/' + path).set(parseInt(miktar));
-        db.ref('durumlar/dozaj_onay').set("isleniyor");
+    const firebaseConfig = { databaseURL: "https://mini-sera-otomasyonum-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function sendCmd(p, v, id) {
+        document.getElementById(id).classList.add('loading');
+        db.ref('kontroller/' + p).set(v);
     }
 
-    // Handshake kısmına Dozaj Onay takibi ekle
-    db.ref('durumlar/dozaj_onay').on('value', s => {
-        if(s.val() === "Tamamlandi") {
-            ['btn_dozaj_a', 'btn_dozaj_b', 'btn_dozaj_ph'].forEach(id => {
-                document.getElementById(id).classList.remove('loading');
-                document.getElementById(id).disabled = false;
-            });
+    function dozaj(p, inputId, btnId) {
+        let ml = document.getElementById(inputId).value;
+        document.getElementById(btnId).classList.add('loading');
+        db.ref('kontroller/' + p).set(parseInt(ml));
+        db.ref('durumlar/dozaj_onay').set("bekliyor");
+    }
+
+    // VERİLERİ DİNLE
+    db.ref().on('value', s => {
+        const data = s.val();
+        if(!data) return;
+
+        // Sensörler
+        document.getElementById('v_is').innerText = data.sensorler.canli.ic_ortam.sicaklik + "°C";
+        document.getElementById('v_in').innerText = "%" + data.sensorler.canli.ic_ortam.nem;
+        document.getElementById('v_ph').innerText = data.sensorler.canli.su_sistemleri.ph_degeri;
+        document.getElementById('v_sd').innerText = "%" + data.sensorler.canli.su_sistemleri.depo_seviye_yuzde;
+        document.getElementById('v_ds').innerText = data.sensorler.canli.dis_ortam.sicaklik + "°C";
+        document.getElementById('v_yg').innerText = data.sensorler.canli.dis_ortam.yagmur_durumu == 1 ? "YAĞIYOR" : "YOK";
+
+        // Cam Durum & Loading Bitir
+        const c = document.getElementById('st_cam');
+        c.innerText = data.durumlar.gercek_cam == 0 ? "AÇIK" : "KAPALI";
+        c.className = data.durumlar.gercek_cam == 0 ? "status-tag tag-on" : "status-tag tag-off";
+        document.getElementById('btn_cam_ac').classList.remove('loading');
+        document.getElementById('btn_cam_kapat').classList.remove('loading');
+
+        // Pompa Durum
+        const p = document.getElementById('st_pompa');
+        p.innerText = data.durumlar.gercek_pompa == 1 ? "ON" : "OFF";
+        p.className = data.durumlar.gercek_pompa == 1 ? "status-tag tag-on" : "status-tag tag-off";
+        document.getElementById('btn_p_ac').classList.remove('loading');
+        document.getElementById('btn_p_kap').classList.remove('loading');
+
+        // Dozaj Loading Bitir
+        if(data.durumlar.dozaj_onay === "Tamamlandi") {
+            ['btn_a', 'btn_b', 'btn_ph'].forEach(id => document.getElementById(id).classList.remove('loading'));
         }
     });
+
+    setInterval(() => { document.getElementById('live-time').innerText = new Date().toLocaleString('tr-TR'); }, 1000);
 </script>
+</body>
+</html>
