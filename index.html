@@ -128,6 +128,16 @@
                 <div class="spinner"></div><span class="btn-text">GÖNDER</span>
             </button>
         </div>
+
+        <div class="control-row">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label>Gübre C:</label>
+                <div><input type="number" id="val_c" value="10"> ml</div>
+            </div>
+            <button id="btn_c" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('dozaj_c_ml', 'val_c', 'btn_c', 'dozaj_c')">
+                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+            </button>
+        </div>
     </div>
 
     <div class="card">
@@ -234,8 +244,9 @@
         document.getElementById('btn_p_kap').classList.remove('loading');
 
         // 4. DOZAJ ONAYLARI
-        if(data.onaylar.dozaj_a === "OK") document.getElementById('btn_a').classList.remove('loading');
+        if(data.onaylar && data.onaylar.dozaj_a === "OK") document.getElementById('btn_a').classList.remove('loading');
         if(data.onaylar && data.onaylar.dozaj_b === "OK") document.getElementById('btn_b').classList.remove('loading');
+        if(data.onaylar && data.onaylar.dozaj_c === "OK") document.getElementById('btn_c').classList.remove('loading');
     });
     }
 
