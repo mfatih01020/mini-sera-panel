@@ -65,6 +65,14 @@
         }
         .login-box button { width: 100%; }
         .error-msg { color: var(--red); font-size: 0.85rem; margin-top: 10px; display: none; }
+
+        /* ALARM VE LİMİT STİLLERİ */
+        .alert-text { color: var(--red) !important; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        .limit-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
+        .limit-row input { width: 100%; padding: 5px; background: #0b0e14; border: 1px solid var(--border); color: white; border-radius: 4px; text-align: center; }
+        .limit-label { font-weight: bold; color: var(--accent); }
     </style>
 </head>
 <body>
@@ -191,6 +199,41 @@
             * Değerleri değiştirdiğinizde sistem otomatik olarak kalibre edilecektir.
         </p>
     </div>
+
+    <!-- ADMİN PANELİ: BİTKİ LİMİTLERİ -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header"><span><i class="fas fa-user-cog"></i> ADMİN PANELİ: BİTKİ LİMİT AYARLARI</span></div>
+        <div class="sensor-group" style="grid-template-columns: 1fr;">
+            <div class="limit-row">
+                <span>PARAMETRE</span>
+                <span>MİNİMUM</span>
+                <span>MAKSİMUM</span>
+            </div>
+            <div class="limit-row">
+                <span class="limit-label">PH DEĞERİ</span>
+                <input type="number" id="lim_ph_min" step="0.1" value="5.5">
+                <input type="number" id="lim_ph_max" step="0.1" value="6.5">
+            </div>
+            <div class="limit-row">
+                <span class="limit-label">TDS (PPM)</span>
+                <input type="number" id="lim_tds_min" value="500">
+                <input type="number" id="lim_tds_max" value="1200">
+            </div>
+            <div class="limit-row">
+                <span class="limit-label">SICAKLIK (°C)</span>
+                <input type="number" id="lim_temp_min" value="18">
+                <input type="number" id="lim_temp_max" value="28">
+            </div>
+            <div class="limit-row">
+                <span class="limit-label">NEM (%)</span>
+                <input type="number" id="lim_nem_min" value="40">
+                <input type="number" id="lim_nem_max" value="80">
+            </div>
+        </div>
+        <button class="btn btn-green" style="width:100%; margin-top: 15px;" onclick="kaydetLimitler()">
+            <span class="btn-text"><i class="fas fa-check-circle"></i> LİMİTLERİ UYGULA VE KAYDET</span>
+        </button>
+    </div>
 </div>
 
 <script>
@@ -264,6 +307,19 @@
         });
     }
 
+    function kaydetLimitler() {
+        const limits = {
+            ph: { min: parseFloat(document.getElementById('lim_ph_min').value), max: parseFloat(document.getElementById('lim_ph_max').value) },
+            tds: { min: parseInt(document.getElementById('lim_tds_min').value), max: parseInt(document.getElementById('lim_tds_max').value) },
+            temp: { min: parseInt(document.getElementById('lim_temp_min').value), max: parseInt(document.getElementById('lim_temp_max').value) },
+            nem: { min: parseInt(document.getElementById('lim_nem_min').value), max: parseInt(document.getElementById('lim_nem_max').value) }
+        };
+
+        db.ref('ayarlar/limitler').update(limits).then(() => {
+            alert("Yeni bitki limitleri kaydedildi ve sisteme gönderildi.");
+        });
+    }
+
     // FIREBASE GERÇEK ZAMANLI DİNLEME (Sadece giriş yapıldıktan sonra çalışır)
     function baslatUygulama() {
         db.ref().on('value', s => {
@@ -292,12 +348,39 @@
             }
 
             // Ayarları Geri Yükle (Sadece kullanıcı odaklanmamışsa güncelle)
-            if(data.ayarlar && data.ayarlar.su_tanki) {
-                const maxInput = document.getElementById('cal_max');
-                const minInput = document.getElementById('cal_min');
+            if(data.ayarlar) {
+                if(data.ayarlar.su_tanki) {
+                    const maxInput = document.getElementById('cal_max');
+                    const minInput = document.getElementById('cal_min');
+                    if (document.activeElement !== maxInput) maxInput.value = data.ayarlar.su_tanki.max_mesafe;
+                    if (document.activeElement !== minInput) minInput.value = data.ayarlar.su_tanki.min_mesafe;
+                }
                 
-                if (document.activeElement !== maxInput) maxInput.value = data.ayarlar.su_tanki.max_mesafe;
-                if (document.activeElement !== minInput) minInput.value = data.ayarlar.su_tanki.min_mesafe;
+                if(data.ayarlar.limitler) {
+                    const lim = data.ayarlar.limitler;
+                    // Giriş kutularını güncelle (odaklı değilse)
+                    const ids = ['lim_ph_min', 'lim_ph_max', 'lim_tds_min', 'lim_tds_max', 'lim_temp_min', 'lim_temp_max', 'lim_nem_min', 'lim_nem_max'];
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        const [key, sub] = id.split('_').slice(1);
+                        if (document.activeElement !== el && lim[key]) el.value = lim[key][sub];
+                    });
+
+                    // Limit Kontrolü ve Görsel Uyarılar
+                    if(data.sensorlar && data.sensorlar.su_seviyesi_yuzde !== undefined) {
+                        const tds = data.sensorlar.tds_degeri;
+                        const tdsEl = document.getElementById('v_tds');
+                        if (tds < lim.tds.min || tds > lim.tds.max) tdsEl.classList.add('alert-text'); else tdsEl.classList.remove('alert-text');
+                    }
+                    if(data.sensorler && data.sensorler.canli && data.sensorler.canli.ic_ortam) {
+                        const t = data.sensorler.canli.ic_ortam.sicaklik;
+                        const n = data.sensorler.canli.ic_ortam.nem;
+                        const tEl = document.getElementById('v_is');
+                        const nEl = document.getElementById('v_in');
+                        if (t < lim.temp.min || t > lim.temp.max) tEl.classList.add('alert-text'); else tEl.classList.remove('alert-text');
+                        if (n < lim.nem.min || n > lim.nem.max) nEl.classList.add('alert-text'); else nEl.classList.remove('alert-text');
+                    }
+                }
             }
         } catch(e) { console.log("Sensor okuma hatasi:", e); }
 
