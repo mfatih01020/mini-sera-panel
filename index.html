@@ -96,19 +96,8 @@
             <span class="btn-text">SİSTEME GİRİŞ YAP</span>
         </button>
         <div id="login-error" class="error-msg">Hatalı Bilgiler!</div>
-    </div> <!-- container -->
-
-<!-- GRAFİK MODALI -->
-<div id="chartModal" class="modal-overlay">
-    <div class="modal-content">
-        <i class="fas fa-times modal-close" onclick="document.getElementById('chartModal').style.display='none'"></i>
-        <h3 id="chartTitle" style="color: var(--accent); margin-top: 0;"><i class="fas fa-chart-line"></i> Geçmiş Veri Grafiği</h3>
-        <p id="chartLoading" style="text-align:center; opacity:0.5; font-size:0.9rem;">Veriler Firebase'den Çekiliyor...</p>
-        <canvas id="sensorChart" style="max-height: 400px; display: none;"></canvas>
     </div>
 </div>
-
-</div> <!-- app-content -->
 
 <div id="app-content" style="display: none;">
 <header>
@@ -300,7 +289,18 @@
 
         </div>
     </div>
-</div>
+
+    <!-- GRAFİK MODALI -->
+    <div id="chartModal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fas fa-times modal-close" onclick="document.getElementById('chartModal').style.display='none'"></i>
+            <h3 id="chartTitle" style="color: var(--accent); margin-top: 0;"><i class="fas fa-chart-line"></i> Geçmiş Veri Grafiği</h3>
+            <p id="chartLoading" style="text-align:center; opacity:0.5; font-size:0.9rem;">Veriler Firebase'den Çekiliyor...</p>
+            <canvas id="sensorChart" style="max-height: 400px; display: none;"></canvas>
+        </div>
+    </div>
+
+</div> <!-- app-content -->
 
 <script>
     const firebaseConfig = {
