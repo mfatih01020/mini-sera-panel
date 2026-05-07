@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -23,8 +24,9 @@
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
         .sensor-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        .sensor-item { background: #0d1117; padding: 12px; border-radius: 10px; border: 1px solid #21262d; text-align: center; }
-        .sensor-label { font-size: 0.7rem; opacity: 0.6; display: block; }
+        .sensor-item { background: #0d1117; padding: 12px; border-radius: 10px; border: 1px solid #21262d; text-align: center; transition: all 0.2s; cursor: pointer; }
+        .sensor-item:hover { background: rgba(88, 166, 255, 0.1); transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 5px 15px rgba(88,166,255,0.1); }
+        .sensor-label { font-size: 0.7rem; opacity: 0.6; display: block; pointer-events: none; }
         .sensor-value { font-size: 1.1rem; font-weight: bold; }
 
         .control-row { background: #0d1117; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #21262d; }
@@ -73,6 +75,12 @@
         .limit-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
         .limit-row input { width: 100%; padding: 5px; background: #0b0e14; border: 1px solid var(--border); color: white; border-radius: 4px; text-align: center; }
         .limit-label { font-weight: bold; color: var(--accent); }
+
+        /* GRAFİK MODAL STİLLERİ */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid var(--accent); width: 90%; max-width: 800px; box-shadow: 0 0 50px rgba(88, 166, 255, 0.2); position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: white; font-size: 1.5rem; cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        .modal-close:hover { opacity: 1; color: var(--red); }
     </style>
 </head>
 <body>
@@ -88,8 +96,19 @@
             <span class="btn-text">SİSTEME GİRİŞ YAP</span>
         </button>
         <div id="login-error" class="error-msg">Hatalı Bilgiler!</div>
+    </div> <!-- container -->
+
+<!-- GRAFİK MODALI -->
+<div id="chartModal" class="modal-overlay">
+    <div class="modal-content">
+        <i class="fas fa-times modal-close" onclick="document.getElementById('chartModal').style.display='none'"></i>
+        <h3 id="chartTitle" style="color: var(--accent); margin-top: 0;"><i class="fas fa-chart-line"></i> Geçmiş Veri Grafiği</h3>
+        <p id="chartLoading" style="text-align:center; opacity:0.5; font-size:0.9rem;">Veriler Firebase'den Çekiliyor...</p>
+        <canvas id="sensorChart" style="max-height: 400px; display: none;"></canvas>
     </div>
 </div>
+
+</div> <!-- app-content -->
 
 <div id="app-content" style="display: none;">
 <header>
@@ -111,13 +130,13 @@
             <span style="font-size: 0.6rem; opacity: 0.5;">Güncelleme: <span class="v_time">--:--</span></span>
         </div>
         <div class="sensor-group">
-            <div class="sensor-item"><span class="sensor-label">HAVA SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">HAVA NEM</span><span id="v_in" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">HAVA BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">TDS (GÜBRE)</span><span id="v_tds" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">PH DEĞERİ</span><span id="v_ph" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ic_sicaklik', 'Hava Sıcaklığı (°C)')"><span class="sensor-label">HAVA SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ic_nem', 'Hava Nemi (%)')"><span class="sensor-label">HAVA NEM</span><span id="v_in" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ic_basinc', 'Hava Basıncı (hPa)')"><span class="sensor-label">HAVA BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('su_seviyesi_yuzde', 'Su Seviyesi Yüzdesi (%)')"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('su_sicakligi', 'Su Sıcaklığı (°C)')"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('tds_degeri', 'TDS / Gübre (ppm)')"><span class="sensor-label">TDS (GÜBRE)</span><span id="v_tds" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ph_degeri', 'pH Değeri')"><span class="sensor-label">PH DEĞERİ</span><span id="v_ph" class="sensor-value">--</span></div>
         </div>
     </div>
 
@@ -128,9 +147,9 @@
             <span style="font-size: 0.6rem; opacity: 0.5;">Güncelleme: <span class="v_time">--:--</span></span>
         </div>
         <div class="sensor-group">
-            <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span id="v_ds" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">NEM</span><span id="v_dn" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">BASINÇ</span><span id="v_db" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('dis_sicaklik', 'Dış Sıcaklık (°C)')"><span class="sensor-label">SICAKLIK</span><span id="v_ds" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('dis_nem', 'Dış Nem (%)')"><span class="sensor-label">NEM</span><span id="v_dn" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('dis_basinc', 'Dış Basınç (hPa)')"><span class="sensor-label">BASINÇ</span><span id="v_db" class="sensor-value">--</span></div>
             <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span id="v_yagmur" class="sensor-value">--</span></div>
         </div>
         <div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; text-align:center;">
@@ -222,7 +241,7 @@
                 <p style="font-weight: bold; color: var(--accent); margin-bottom: 15px;"><i class="fas fa-flask"></i> Dozaj Pompası Kalibrasyonu</p>
                 <div style="display:grid; gap:15px;">
                     <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px;">
-                        <p style="font-size:0.7rem; margin-bottom:10px;">MOTOR A / B / C (Saniye/ml Hesaplama)</p>
+                        <p id="cal_info_text" style="font-size:0.7rem; margin-bottom:10px; color:var(--accent);">MOTOR A / B / C (Saniye/ml Hesaplama)</p>
                         <div style="display:flex; gap:5px; margin-bottom:10px;">
                             <button class="btn btn-green" style="font-size:0.6rem; padding:5px;" onclick="calMotorStart('A')">A BAŞLAT</button>
                             <button class="btn btn-green" style="font-size:0.6rem; padding:5px;" onclick="calMotorStart('B')">B BAŞLAT</button>
@@ -366,19 +385,14 @@
     // --- KALİBRASYON MOTOR KONTROLLERİ ---
     let motorStartTime = 0;
     function calMotorStart(m) {
-        motorStartTime = Date.now();
         gonderIslem("CAL_START_" + m, 1, ""); 
+        const infoEl = document.getElementById('cal_info_text');
+        if(infoEl) { infoEl.innerText = "Motor " + m + " ÇALIŞIYOR..."; infoEl.style.color = "yellow"; }
     }
     function calMotorStopAll() {
-        const duration = Date.now() - motorStartTime;
         gonderIslem("CAL_STOP", 0, "");
-        window.lastMotorDuration = duration;
-        
-        // Alert tarayıcıyı kilitlediği için Firebase veriyi gönderemiyordu.
-        // Bu yüzden ağ işleminin gitmesi için yarım saniye gecikme ekliyoruz.
-        setTimeout(() => {
-            alert("Motor durduruldu. Sure: " + (duration/1000).toFixed(2) + " sn.\nKaç ml dolduğunu yazıp KAYDET'e basın.");
-        }, 500);
+        const infoEl = document.getElementById('cal_info_text');
+        if(infoEl) { infoEl.innerText = "Mega'dan Kesin Süre Bekleniyor..."; infoEl.style.color = "orange"; }
     }
     function calMotorSave() {
         const ml = document.getElementById('cal_ml_input').value;
@@ -447,9 +461,22 @@
             if (!data) return;
 
             // Ayarları UI'a yükle (Focus yoksa)
-            if (data.ayarlar && data.ayarlar.data) {
-                const d = data.ayarlar.data;
-                const setV = (id, v) => { const el = document.getElementById(id); if(el && !el.matches(':focus')) el.value = v; };
+            if (data.ayarlar) {
+                // Donanımsal Kalibrasyon Süresini Yakala
+                if (data.ayarlar.last_cal_duration !== undefined) {
+                    if (window.lastMotorDuration !== data.ayarlar.last_cal_duration) {
+                        window.lastMotorDuration = data.ayarlar.last_cal_duration;
+                        const infoEl = document.getElementById('cal_info_text');
+                        if (infoEl) { 
+                            infoEl.innerText = "Motor Durdu. Kesin Süre: " + (window.lastMotorDuration / 1000).toFixed(2) + " sn"; 
+                            infoEl.style.color = "lime";
+                        }
+                    }
+                }
+
+                if (data.ayarlar.data) {
+                    const d = data.ayarlar.data;
+                    const setV = (id, v) => { const el = document.getElementById(id); if(el && !el.matches(':focus')) el.value = v; };
                 if (d.offsets) {
                     setV('off_is', d.offsets.it); setV('off_in', d.offsets.in);
                     setV('off_ds', d.offsets.dt); setV('off_dn', d.offsets.dn);
@@ -553,10 +580,96 @@
         });
     }
 
-    // Canlı Saat
-    setInterval(() => { 
-        document.getElementById('live-time').innerText = new Date().toLocaleString('tr-TR'); 
+    // Live time
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('live-time').innerText = now.toLocaleString('tr-TR');
     }, 1000);
+
+    // --- GRAFİK FONKSİYONLARI ---
+    let sensorChartInstance = null;
+
+    function grafikGoster(sensorKey, title) {
+        // Modalı Aç
+        document.getElementById('chartModal').style.display = 'flex';
+        document.getElementById('chartTitle').innerText = title + " Geçmiş Grafiği";
+        document.getElementById('chartLoading').style.display = 'block';
+        document.getElementById('sensorChart').style.display = 'none';
+
+        // Firebase'den Son 100 Kaydı Çek (Geçmiş dizininden)
+        db.ref('gecmis/sensorlar').orderByKey().limitToLast(100).once('value')
+        .then((snapshot) => {
+            document.getElementById('chartLoading').style.display = 'none';
+            document.getElementById('sensorChart').style.display = 'block';
+
+            const veriler = snapshot.val();
+            const labels = [];
+            const dataPoints = [];
+
+            if (veriler) {
+                // Objeyi diziye çevirip tarihe göre sırala
+                Object.keys(veriler).forEach(key => {
+                    const kayit = veriler[key];
+                    if (kayit && kayit[sensorKey] !== undefined && kayit[sensorKey] !== -999) {
+                        labels.push(kayit.son_guncelleme || "--:--");
+                        dataPoints.push(kayit[sensorKey]);
+                    }
+                });
+            }
+
+            if (labels.length === 0) {
+                document.getElementById('chartLoading').innerText = "Kayıtlı veri bulunamadı.";
+                document.getElementById('chartLoading').style.display = 'block';
+                document.getElementById('sensorChart').style.display = 'none';
+                return;
+            }
+
+            // Grafiği Çiz
+            cizGrafik(labels, dataPoints, title);
+        })
+        .catch(err => {
+            document.getElementById('chartLoading').innerText = "Hata: " + err.message;
+        });
+    }
+
+    function cizGrafik(labels, dataPoints, labelName) {
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+        
+        // Varsa eski grafiği yok et
+        if (sensorChartInstance) {
+            sensorChartInstance.destroy();
+        }
+
+        sensorChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: labelName,
+                    data: dataPoints,
+                    borderColor: '#58a6ff',
+                    backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#58a6ff',
+                    fill: true,
+                    tension: 0.3 // Yumuşak çizgiler
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#c9d1d9' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+    }
+
 </script>
 </body>
 </html>
