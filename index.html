@@ -149,10 +149,10 @@
     <div class="card">
         <div class="card-header"><span>SİSTEM ANALİZİ</span></div>
         <div class="sensor-group">
-            <div class="sensor-item"><span class="sensor-label">SU pH</span><span id="v_ph" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">DEPO</span><span id="v_sd" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">DIŞ ISI</span><span id="v_ds" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span id="v_yg" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">TDS DEĞERİ</span><span id="v_tds" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">SİSTEM SAATİ</span><span id="v_saat" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span id="v_yagmur" class="sensor-value">--</span></div>
         </div>
         <div class="control-row" style="margin-top:15px;">
             <span>Pompa: <span id="st_pompa" class="status-tag tag-off">...</span></span>
@@ -229,14 +229,24 @@
             if(!data) return;
 
         // 1. SENSÖR VERİLERİ (Eski UI Yerleşimi)
+        // 1. SENSÖR VERİLERİ
         try {
-            document.getElementById('v_is').innerText = data.sensorler.canli.ic_ortam.sicaklik + "°C";
-            document.getElementById('v_in').innerText = "%" + data.sensorler.canli.ic_ortam.nem;
-            document.getElementById('v_ph').innerText = data.sensorler.canli.su_sistemleri.ph_degeri;
-            document.getElementById('v_sd').innerText = "%" + data.sensorler.canli.su_sistemleri.depo_seviye_yuzde;
-            document.getElementById('v_ds').innerText = data.sensorler.canli.dis_ortam.sicaklik + "°C";
-            document.getElementById('v_yg').innerText = data.sensorler.canli.dis_ortam.yagmur_durumu == 1 ? "YAĞIYOR" : "YOK";
-        } catch(e) {}
+            // Mevcut veriler
+            if(data.sensorler.canli) {
+                if(data.sensorler.canli.ic_ortam) {
+                    document.getElementById('v_is').innerText = (data.sensorler.canli.ic_ortam.sicaklik || "--") + "°C";
+                    document.getElementById('v_in').innerText = "%" + (data.sensorler.canli.ic_ortam.nem || "--");
+                }
+            }
+            
+            // Yeni Sensör Verileri (Arduino Mega'dan Gelen)
+            if(data.sensorlar) {
+                document.getElementById('v_su').innerText = (data.sensorlar.su_seviyesi || "--") + " cm";
+                document.getElementById('v_yagmur').innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
+                document.getElementById('v_tds').innerText = (data.sensorlar.tds_degeri || "--") + " ppm";
+                document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
+            }
+        } catch(e) { console.log("Sensor okuma hatasi:", e); }
 
         // 2. CAM DURUMU
         const camDurum = data.durumlar ? data.durumlar.gercek_cam : 1;
