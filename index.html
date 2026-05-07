@@ -477,13 +477,14 @@
                 if (data.ayarlar.data) {
                     const d = data.ayarlar.data;
                     const setV = (id, v) => { const el = document.getElementById(id); if(el && !el.matches(':focus')) el.value = v; };
-                if (d.offsets) {
-                    setV('off_is', d.offsets.it); setV('off_in', d.offsets.in);
-                    setV('off_ds', d.offsets.dt); setV('off_dn', d.offsets.dn);
-                    setV('off_ph', d.offsets.ph); setV('off_tds', d.offsets.tds);
+                    if (d.offsets) {
+                        setV('off_is', d.offsets.it); setV('off_in', d.offsets.in);
+                        setV('off_ds', d.offsets.dt); setV('off_dn', d.offsets.dn);
+                        setV('off_ph', d.offsets.ph); setV('off_tds', d.offsets.tds);
+                    }
+                    if (d.depo) { setV('cfg_max_dist', d.depo.max); setV('cfg_min_dist', d.depo.min); }
+                    if (d.sistem) { setV('cfg_hata_max', d.sistem.hata_max); }
                 }
-                if (d.depo) { setV('cfg_max_dist', d.depo.max); setV('cfg_min_dist', d.depo.min); }
-                if (d.sistem) { setV('cfg_hata_max', d.sistem.hata_max); }
             }
 
             // 1. SENSÖR VERİLERİ VE ARIZA KONTROLÜ
