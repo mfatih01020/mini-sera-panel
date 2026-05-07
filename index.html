@@ -96,6 +96,11 @@
     <h1><i class="fas fa-leaf"></i> SMART SERA PRO</h1>
     <p id="live-time">...</p>
     <div id="sys-status" class="status-tag tag-off" style="display: inline-block; margin-top:10px;">BAĞLANTI BEKLENİYOR...</div>
+    <div style="position: absolute; top: 20px; right: 20px;">
+        <button class="btn btn-blue" style="padding: 10px; border-radius: 50%; width: 40px; height: 40px;" onclick="acAdminPaneli()">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
 </header>
 
 <div class="container">
@@ -118,6 +123,16 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><span>DIŞ ORTAM</span></div>
+        <div class="sensor-group">
+            <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span id="v_ds" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">NEM</span><span id="v_dn" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">BASINÇ</span><span id="v_db" class="sensor-value">--</span></div>
+        </div>
+        <p style="font-size:0.7rem; opacity:0.6; margin-top:10px; text-align:center;">Hava İstasyonu Verileri</p>
     </div>
 
     <div class="card">
@@ -177,21 +192,56 @@
         </div>
     </div>
 
-    <!-- ADMİN PANELİ -->
-    <div class="card" style="grid-column: 1 / -1;">
-        <div class="card-header"><span><i class="fas fa-user-cog"></i> ADMİN PANELİ: SİSTEM AYARLARI</span></div>
+    <!-- ADMİN PANELİ (Varsayılan olarak gizli) -->
+    <div id="admin-panel" class="card" style="grid-column: 1 / -1; display: none; background: rgba(0,0,0,0.8); border: 1px solid var(--accent);">
+        <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <span><i class="fas fa-user-shield"></i> ADMİN PANELİ: KRİTİK AYARLAR</span>
+            <button class="btn btn-red" style="padding:5px 10px;" onclick="kapatAdminPaneli()">X</button>
+        </div>
         
         <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
-            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-water"></i> Su Tankı Kalibrasyonu</p>
-            <div class="limit-row">
-                <span title="Tank tamamen boşken sensörün okuduğu mesafe">Boş Tank Mesafesi (cm)</span>
-                <input type="number" id="cal_max" value="100">
-                <span></span>
+            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-flask"></i> Dozaj Pompası Kalibrasyon Labı</p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
+                    <p style="font-size:0.8rem;">MOTOR A (PH)</p>
+                    <button class="btn btn-green" style="padding:5px; font-size:0.7rem;" onclick="calMotorStart('A')">BAŞLAT</button>
+                    <button class="btn btn-red" style="padding:5px; font-size:0.7rem;" onclick="calMotorStop('A')">DURDUR</button>
+                    <input type="number" id="cal_m1_ml" placeholder="Ölçülen ml" style="width:100%; margin-top:5px; font-size:0.8rem;">
+                    <button class="btn btn-blue" style="width:100%; font-size:0.7rem; margin-top:5px;" onclick="calMotorSave('A')">KAYDET</button>
+                </div>
+                <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
+                    <p style="font-size:0.8rem;">MOTOR B (TDS)</p>
+                    <button class="btn btn-green" style="padding:5px; font-size:0.7rem;" onclick="calMotorStart('B')">BAŞLAT</button>
+                    <button class="btn btn-red" style="padding:5px; font-size:0.7rem;" onclick="calMotorStop('B')">DURDUR</button>
+                    <input type="number" id="cal_m2_ml" placeholder="Ölçülen ml" style="width:100%; margin-top:5px; font-size:0.8rem;">
+                    <button class="btn btn-blue" style="width:100%; font-size:0.7rem; margin-top:5px;" onclick="calMotorSave('B')">KAYDET</button>
+                </div>
+                <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
+                    <p style="font-size:0.8rem;">MOTOR C (GÜBRE)</p>
+                    <button class="btn btn-green" style="padding:5px; font-size:0.7rem;" onclick="calMotorStart('C')">BAŞLAT</button>
+                    <button class="btn btn-red" style="padding:5px; font-size:0.7rem;" onclick="calMotorStop('C')">DURDUR</button>
+                    <input type="number" id="cal_m3_ml" placeholder="Ölçülen ml" style="width:100%; margin-top:5px; font-size:0.8rem;">
+                    <button class="btn btn-blue" style="width:100%; font-size:0.7rem; margin-top:5px;" onclick="calMotorSave('C')">KAYDET</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-tools"></i> Sensör Kalibrasyon (Sapma/Offset)</p>
+            <div class="limit-row" style="font-size:0.7rem; opacity:0.6;">
+                <span>SENSÖR</span>
+                <span>İÇ ORTAM</span>
+                <span>DIŞ ORTAM</span>
             </div>
             <div class="limit-row">
-                <span title="Tank tamamen doluyken sensörün okuduğu mesafe">Dolu Tank Mesafesi (cm)</span>
-                <input type="number" id="cal_min" value="10">
-                <span></span>
+                <span>SICAKLIK (°C)</span>
+                <input type="number" id="off_it" step="0.1" value="0">
+                <input type="number" id="off_dt" step="0.1" value="0">
+            </div>
+            <div class="limit-row">
+                <span>NEM (%)</span>
+                <input type="number" id="off_in" step="0.1" value="0">
+                <input type="number" id="off_dn" step="0.1" value="0">
             </div>
         </div>
 
@@ -283,7 +333,45 @@
         gonderIslem(islem_adi, ml, btnId);
     }
 
+    // DOZAJ KALİBRASYON LABI
+    let calStartTime = 0;
+    function calMotorStart(m) {
+        calStartTime = Date.now();
+        db.ref('sistem_durumu').update({ aktif_islem: "DOZAJ_" + m, islem_verisi: 9999, islem_durumu: "WAIT" });
+    }
+    function calMotorStop(m) {
+        const duration = Date.now() - calStartTime;
+        db.ref('sistem_durumu').update({ aktif_islem: "POMPA_KAPAT", islem_durumu: "WAIT" }); // Durdurmak için pompa kapat yolla
+        window["lastCalDuration_" + m] = duration;
+        alert(m + " Motoru " + (duration/1000).toFixed(2) + " saniye çalıştı. Lütfen kaptaki ml değerini girip KAYDET'e basın.");
+    }
+    function calMotorSave(m) {
+        const ml = parseFloat(document.getElementById('cal_m' + (m=='A'?1:m=='B'?2:3) + '_ml').value);
+        if(!ml || ml <= 0) return alert("Lütfen geçerli bir ml girin!");
+        const duration = window["lastCalDuration_" + m];
+        const coeff = Math.round(duration / ml);
+        db.ref('ayarlar/motor_coeffs').update({ ["m" + (m=='A'?1:m=='B'?2:3) + "_coeff"]: coeff }).then(() => {
+            alert("Motor " + m + " Kalibre Edildi: 1ml = " + coeff + "ms");
+        });
+    }
+
+    function acAdminPaneli() {
+        const pin = prompt("Admin Giriş PIN Kodunu Giriniz:");
+        if (pin === "1234") { // Burayı istediğiniz bir şifre yapabilirsiniz
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert("Hatalı PIN!");
+        }
+    }
+
+    function kapatAdminPaneli() {
+        document.getElementById('admin-panel').style.display = 'none';
+    }
+
     function kaydetTumAyarlar() {
+        if(!confirm("Kritik sistem ayarları değiştirilecek. Emin misiniz?")) return;
+        
         const settings = {
             su_tanki: {
                 max_mesafe: parseInt(document.getElementById('cal_max').value),
@@ -341,14 +429,29 @@
             // Yeni Sensör Verileri (Arduino Mega'dan Gelen)
             if(data.sensorlar) {
                 let yuzde = (data.sensorlar.su_seviyesi_yuzde !== undefined) ? data.sensorlar.su_seviyesi_yuzde : 0;
-                // Absürt değer kontrolü: 0-100 arasına zorla
-                if (yuzde > 100) yuzde = 100;
-                if (yuzde < 0) yuzde = 0;
+                const cm = data.sensorlar.su_seviyesi_cm;
 
-                const cm = data.sensorlar.su_seviyesi_cm || "--";
-                document.getElementById('v_su').innerText = "%" + yuzde + " (" + cm + " cm)";
+                if (cm === -999 || yuzde === -999) {
+                    document.getElementById('v_su').innerText = "SENSÖR ARIZASI";
+                    document.getElementById('v_su').style.color = "red";
+                } else {
+                    if (yuzde > 100) yuzde = 100;
+                    if (yuzde < 0) yuzde = 0;
+                    document.getElementById('v_su').innerText = "%" + yuzde + " (" + cm + " cm)";
+                    document.getElementById('v_su').style.color = "var(--accent)";
+                }
+
                 document.getElementById('v_yagmur').innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
-                document.getElementById('v_tds').innerText = (data.sensorlar.tds_degeri !== undefined) ? data.sensorlar.tds_degeri : "--";
+                
+                let tds = data.sensorlar.tds_degeri;
+                if (tds === -999) {
+                    document.getElementById('v_tds').innerText = "ARIZA";
+                    document.getElementById('v_tds').style.color = "red";
+                } else {
+                    document.getElementById('v_tds').innerText = (tds !== undefined) ? tds + " ppm" : "--";
+                    document.getElementById('v_tds').style.color = "white";
+                }
+                
                 document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
             }
 
