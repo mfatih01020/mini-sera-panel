@@ -16,13 +16,13 @@
         }
 
         body { font-family: -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; }
-        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
+        .container { max-width: 1200px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
         
         header { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--accent); }
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
 
-        .sensor-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sensor-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
         .sensor-item { background: #0d1117; padding: 12px; border-radius: 10px; border: 1px solid #21262d; text-align: center; }
         .sensor-label { font-size: 0.7rem; opacity: 0.6; display: block; }
         .sensor-value { font-size: 1.1rem; font-weight: bold; }
