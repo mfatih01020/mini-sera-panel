@@ -276,10 +276,23 @@
                 if (aktif === "DOZAJ_C") document.getElementById('btn_c').classList.remove('loading');
             }
 
-            // Hata Kontrolü
-            if (data.sistem_durumu.son_hata === "HATA:ILETISIM_KOPTU") {
-                alert("SİSTEM HATASI: Arduino Mega ile iletişim kurulamadı!");
-                db.ref('sistem_durumu/son_hata').set(""); 
+            // Gelişmiş Hata Kontrolü (Error Handling)
+            if (data.sistem_durumu.son_hata && data.sistem_durumu.son_hata.startsWith("HATA:")) {
+                const hataKodu = data.sistem_durumu.son_hata;
+                let mesaj = "Bilinmeyen Bir Hata Oluştu.";
+
+                if (hataKodu === "HATA:ILETISIM_KOPTU") mesaj = "ERR_01: BAĞLANTI_KOPTU - NodeMCU ile Mega arası donanımsal iletişim kesildi. Lütfen seri kabloları kontrol edin.";
+                else if (hataKodu === "HATA:ERR00") mesaj = "ERR_00: BİLİNMEYEN_KOMUT - Gönderilen komut Mega kartı tarafından anlaşılamadı.";
+                else if (hataKodu === "HATA:ERR02") mesaj = "ERR_02: GECERSİZ_VERİ - Dozaj B motoru için tanımlanan ml değeri çok düşük veya çok yüksek.";
+                else if (hataKodu === "HATA:ERR03") mesaj = "ERR_03: MOTOR_ZAMAN_ASIMI - Dozaj A (Motor 1) maksimum çalışma süresini aştı! Su bitmiş veya hortum tıkanmış olabilir. Motor güvenlik amacıyla kilitlendi.";
+                else if (hataKodu === "HATA:ERR04") mesaj = "ERR_04: MOTOR_ZAMAN_ASIMI - Dozaj B (Motor 2) maksimum çalışma süresini aştı! Su bitmiş veya hortum tıkanmış olabilir. Motor güvenlik amacıyla kilitlendi.";
+                else if (hataKodu === "HATA:ERR05") mesaj = "ERR_05: GECERSİZ_VERİ - Dozaj C motoru için tanımlanan ml değeri çok düşük veya çok yüksek.";
+                else if (hataKodu === "HATA:ERR06") mesaj = "ERR_06: MOTOR_ZAMAN_ASIMI - Dozaj C (Motor 3) maksimum çalışma süresini aştı! Su bitmiş veya hortum tıkanmış olabilir. Motor güvenlik amacıyla kilitlendi.";
+                else if (hataKodu === "HATA:ERR07") mesaj = "ERR_07: ANA_POMPA_ZAMAN_ASIMI - Ana Pompa çok uzun süredir çalışıyor. Su taşmasını engellemek için sistem güvenlik kilitlenmesi yaşadı.";
+                else mesaj = "SİSTEM ALARMI: " + hataKodu;
+
+                alert("SİSTEM UYARISI!\n\n" + mesaj);
+                db.ref('sistem_durumu/son_hata').set(""); // Bir kez gösterdikten sonra temizle
             }
         }
     });
