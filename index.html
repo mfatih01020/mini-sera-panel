@@ -155,7 +155,9 @@
             <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span id="v_yagmur" class="sensor-value">--</span></div>
         </div>
         <div class="control-row" style="margin-top:15px;">
-            <span>Pompa: <span id="st_pompa" class="status-tag tag-off">...</span></span>
+            <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
+                <span>Pompa: <span id="st_pompa" class="status-tag tag-off">...</span></span>
+            </div>
             <div class="btn-group">
                 <button id="btn_p_ac" class="btn btn-green" onclick="runAction('POMPA', 1, 'btn_p_ac')">
                     <div class="spinner"></div><span class="btn-text">BAŞLAT</span>
@@ -165,6 +167,29 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- KALİBRASYON KARTI -->
+    <div class="card">
+        <div class="card-header"><span><i class="fas fa-sliders-h"></i> SU TANKI KALİBRASYONU</span></div>
+        <div class="control-row">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label title="Tank tamamen boşken sensörün okuduğu mesafe">Boş Tank Mesafesi:</label>
+                <div><input type="number" id="cal_max" value="100"> cm</div>
+            </div>
+        </div>
+        <div class="control-row">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label title="Tank tamamen doluyken sensörün okuduğu mesafe">Dolu Tank Mesafesi:</label>
+                <div><input type="number" id="cal_min" value="10"> cm</div>
+            </div>
+        </div>
+        <button class="btn btn-blue" style="width:100%;" onclick="kaydetKalibrasyon()">
+            <span class="btn-text"><i class="fas fa-save"></i> AYARLARI KAYDET</span>
+        </button>
+        <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 10px; text-align: center;">
+            * Değerleri değiştirdiğinizde sistem otomatik olarak kalibre edilecektir.
+        </p>
     </div>
 </div>
 
@@ -222,6 +247,23 @@
         gonderIslem(islem_adi, ml, btnId);
     }
 
+    function kaydetKalibrasyon() {
+        const max_dist = parseInt(document.getElementById('cal_max').value);
+        const min_dist = parseInt(document.getElementById('cal_min').value);
+        
+        if (isNaN(max_dist) || isNaN(min_dist)) {
+            alert("Lütfen geçerli sayılar girin!");
+            return;
+        }
+
+        db.ref('ayarlar/su_tanki').update({
+            max_mesafe: max_dist,
+            min_mesafe: min_dist
+        }).then(() => {
+            alert("Kalibrasyon ayarları gönderildi. Sistemin güncellenmesi birkaç saniye sürebilir.");
+        });
+    }
+
     // FIREBASE GERÇEK ZAMANLI DİNLEME (Sadece giriş yapıldıktan sonra çalışır)
     function baslatUygulama() {
         db.ref().on('value', s => {
@@ -241,10 +283,18 @@
             
             // Yeni Sensör Verileri (Arduino Mega'dan Gelen)
             if(data.sensorlar) {
-                document.getElementById('v_su').innerText = (data.sensorlar.su_seviyesi || "--") + " cm";
+                const yuzde = data.sensorlar.su_seviyesi_yuzde || 0;
+                const cm = data.sensorlar.su_seviyesi_cm || "--";
+                document.getElementById('v_su').innerText = "%" + yuzde + " (" + cm + "cm)";
                 document.getElementById('v_yagmur').innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
                 document.getElementById('v_tds').innerText = (data.sensorlar.tds_degeri || "--") + " ppm";
                 document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
+            }
+
+            // Ayarları Geri Yükle (UI'a yansıt)
+            if(data.ayarlar && data.ayarlar.su_tanki) {
+                document.getElementById('cal_max').value = data.ayarlar.su_tanki.max_mesafe;
+                document.getElementById('cal_min').value = data.ayarlar.su_tanki.min_mesafe;
             }
         } catch(e) { console.log("Sensor okuma hatasi:", e); }
 
