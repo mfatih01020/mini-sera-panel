@@ -346,13 +346,11 @@
 
     function runAction(islem_adi, value, btnId) { 
         console.log("Button clicked:", islem_adi);
-        alert(islem_adi + " komutu tetiklendi! Gonderiliyor..."); 
         gonderIslem(islem_adi, value, btnId); 
     }
     function runDozaj(islem_adi, inputId, btnId) { 
         const val = document.getElementById(inputId).value;
         console.log("Dozaj clicked:", islem_adi, val);
-        alert(islem_adi + " (" + val + " ml) komutu tetiklendi! Gonderiliyor...");
         gonderIslem(islem_adi, val, btnId); 
     }
 
@@ -375,7 +373,12 @@
         const duration = Date.now() - motorStartTime;
         gonderIslem("CAL_STOP", 0, "");
         window.lastMotorDuration = duration;
-        alert("Motor durduruldu. Sure: " + (duration/1000).toFixed(2) + " sn.\nKaç ml dolduğunu yazıp KAYDET'e basın.");
+        
+        // Alert tarayıcıyı kilitlediği için Firebase veriyi gönderemiyordu.
+        // Bu yüzden ağ işleminin gitmesi için yarım saniye gecikme ekliyoruz.
+        setTimeout(() => {
+            alert("Motor durduruldu. Sure: " + (duration/1000).toFixed(2) + " sn.\nKaç ml dolduğunu yazıp KAYDET'e basın.");
+        }, 500);
     }
     function calMotorSave() {
         const ml = document.getElementById('cal_ml_input').value;
