@@ -283,18 +283,21 @@
             
             // Yeni Sensör Verileri (Arduino Mega'dan Gelen)
             if(data.sensorlar) {
-                const yuzde = data.sensorlar.su_seviyesi_yuzde || 0;
+                const yuzde = (data.sensorlar.su_seviyesi_yuzde !== undefined) ? data.sensorlar.su_seviyesi_yuzde : 0;
                 const cm = data.sensorlar.su_seviyesi_cm || "--";
-                document.getElementById('v_su').innerText = "%" + yuzde + " (" + cm + "cm)";
+                document.getElementById('v_su').innerText = "%" + yuzde + " (" + cm + " cm)";
                 document.getElementById('v_yagmur').innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
-                document.getElementById('v_tds').innerText = (data.sensorlar.tds_degeri || "--") + " ppm";
+                document.getElementById('v_tds').innerText = (data.sensorlar.tds_degeri !== undefined) ? data.sensorlar.tds_degeri : "--";
                 document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
             }
 
-            // Ayarları Geri Yükle (UI'a yansıt)
+            // Ayarları Geri Yükle (Sadece kullanıcı odaklanmamışsa güncelle)
             if(data.ayarlar && data.ayarlar.su_tanki) {
-                document.getElementById('cal_max').value = data.ayarlar.su_tanki.max_mesafe;
-                document.getElementById('cal_min').value = data.ayarlar.su_tanki.min_mesafe;
+                const maxInput = document.getElementById('cal_max');
+                const minInput = document.getElementById('cal_min');
+                
+                if (document.activeElement !== maxInput) maxInput.value = data.ayarlar.su_tanki.max_mesafe;
+                if (document.activeElement !== minInput) minInput.value = data.ayarlar.su_tanki.min_mesafe;
             }
         } catch(e) { console.log("Sensor okuma hatasi:", e); }
 
