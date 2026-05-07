@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Sera Pro | Kontrol Paneli</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -72,17 +73,22 @@
 <div id="login-overlay">
     <div class="login-box">
         <h2><i class="fas fa-lock"></i> GÜVENLİK</h2>
-        <p style="font-size: 0.9rem; opacity: 0.7;">Sisteme erişmek için şifrenizi girin</p>
+        <p style="font-size: 0.9rem; opacity: 0.7;">Sisteme erişmek için yetkilendirilmiş hesapla giriş yapın</p>
+        <input type="email" id="login-email" placeholder="E-Posta Adresi">
         <input type="password" id="login-pwd" placeholder="••••••••" onkeypress="if(event.key === 'Enter') checkLogin()">
         <button class="btn btn-blue" onclick="checkLogin()">
             <span class="btn-text">GİRİŞ YAP</span>
         </button>
-        <div id="login-error" class="error-msg">Hatalı Şifre!</div>
+        <div id="login-error" class="error-msg">Giriş Başarısız!</div>
     </div>
 </div>
 
 <div id="app-content" style="display: none;">
-<header><h1><i class="fas fa-leaf"></i> SMART SERA PRO</h1><p id="live-time">...</p></header>
+<header>
+    <h1><i class="fas fa-leaf"></i> SMART SERA PRO</h1>
+    <p id="live-time">...</p>
+    <div id="sys-status" class="status-tag tag-off" style="display: inline-block; margin-top:10px;">BAĞLANTI BEKLENİYOR...</div>
+</header>
 
 <div class="container">
     <div class="card">
@@ -96,10 +102,10 @@
                 <span>Cam: <span id="st_cam" class="status-tag tag-off">...</span></span>
             </div>
             <div class="btn-group">
-                <button id="btn_cam_ac" class="btn btn-green" onclick="runAction('cam_istek', 0, 'btn_cam_ac')">
+                <button id="btn_cam_ac" class="btn btn-green" onclick="runAction('CAM', 0, 'btn_cam_ac')">
                     <div class="spinner"></div><span class="btn-text">AÇ</span>
                 </button>
-                <button id="btn_cam_kapat" class="btn btn-red" onclick="runAction('cam_istek', 1, 'btn_cam_kapat')">
+                <button id="btn_cam_kapat" class="btn btn-red" onclick="runAction('CAM', 1, 'btn_cam_kapat')">
                     <div class="spinner"></div><span class="btn-text">KAPAT</span>
                 </button>
             </div>
@@ -114,7 +120,7 @@
                 <label>Gübre A:</label>
                 <div><input type="number" id="val_a" value="10"> ml</div>
             </div>
-            <button id="btn_a" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('dozaj_a_ml', 'val_a', 'btn_a', 'dozaj_a')">
+            <button id="btn_a" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('DOZAJ_A', 'val_a', 'btn_a')">
                 <div class="spinner"></div><span class="btn-text">GÖNDER</span>
             </button>
         </div>
@@ -124,7 +130,7 @@
                 <label>Gübre B:</label>
                 <div><input type="number" id="val_b" value="10"> ml</div>
             </div>
-            <button id="btn_b" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('dozaj_b_ml', 'val_b', 'btn_b', 'dozaj_b')">
+            <button id="btn_b" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('DOZAJ_B', 'val_b', 'btn_b')">
                 <div class="spinner"></div><span class="btn-text">GÖNDER</span>
             </button>
         </div>
@@ -134,7 +140,7 @@
                 <label>Gübre C:</label>
                 <div><input type="number" id="val_c" value="10"> ml</div>
             </div>
-            <button id="btn_c" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('dozaj_c_ml', 'val_c', 'btn_c', 'dozaj_c')">
+            <button id="btn_c" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('DOZAJ_C', 'val_c', 'btn_c')">
                 <div class="spinner"></div><span class="btn-text">GÖNDER</span>
             </button>
         </div>
@@ -151,10 +157,10 @@
         <div class="control-row" style="margin-top:15px;">
             <span>Pompa: <span id="st_pompa" class="status-tag tag-off">...</span></span>
             <div class="btn-group">
-                <button id="btn_p_ac" class="btn btn-green" onclick="runAction('pompa_istek', 1, 'btn_p_ac')">
+                <button id="btn_p_ac" class="btn btn-green" onclick="runAction('POMPA', 1, 'btn_p_ac')">
                     <div class="spinner"></div><span class="btn-text">BAŞLAT</span>
                 </button>
-                <button id="btn_p_kap" class="btn btn-red" onclick="runAction('pompa_istek', 0, 'btn_p_kap')">
+                <button id="btn_p_kap" class="btn btn-red" onclick="runAction('POMPA', 0, 'btn_p_kap')">
                     <div class="spinner"></div><span class="btn-text">DURDUR</span>
                 </button>
             </div>
@@ -166,48 +172,45 @@
     const firebaseConfig = { databaseURL: "https://mini-sera-otomasyonum-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
-    // ŞİFRE KONTROL MANTIĞI
+    // FIREBASE AUTH MANTIĞI
     function checkLogin() {
-        const inputPwd = document.getElementById('login-pwd').value;
-        if (!inputPwd) return;
+        const email = document.getElementById('login-email').value;
+        const pwd = document.getElementById('login-pwd').value;
+        if (!email || !pwd) return;
 
-        // Firebase'den şifreyi oku
-        db.ref('ayarlar/sifre').once('value').then(snapshot => {
-            let gercekSifre = snapshot.val();
-            
-            // Eğer veritabanında henüz bir şifre belirlenmemişse, varsayılan olarak "1234" yap
-            if (!gercekSifre) {
-                gercekSifre = "1234";
-                db.ref('ayarlar/sifre').set("1234");
-            }
-
-            if (inputPwd === gercekSifre.toString()) {
-                // Şifre Doğru: Ekranı aç ve dinlemeye başla
+        auth.signInWithEmailAndPassword(email, pwd)
+            .then((userCredential) => {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
                 baslatUygulama();
-            } else {
-                // Şifre Yanlış
+            })
+            .catch((error) => {
                 const err = document.getElementById('login-error');
+                err.innerText = "Hata: " + error.message;
                 err.style.display = 'block';
-                setTimeout(() => err.style.display = 'none', 3000);
-            }
+                setTimeout(() => err.style.display = 'none', 5000);
+            });
+    }
+
+    // Devlet Makinesi (State Machine) İşlem Gönderimi
+    function gonderIslem(aktif_islem, islem_verisi, btnId) {
+        document.getElementById(btnId).classList.add('loading');
+        db.ref('sistem_durumu').update({
+            aktif_islem: aktif_islem,
+            islem_verisi: parseInt(islem_verisi),
+            islem_durumu: "WAIT"
         });
     }
 
-    // Cam ve Pompa için komut gönderimi
-    function runAction(path, value, btnId) {
-        document.getElementById(btnId).classList.add('loading');
-        db.ref('kontroller/' + path).set(value);
+    function runAction(islem_adi, value, btnId) {
+        gonderIslem(islem_adi, value, btnId);
     }
 
-    // Dozaj motorları için komut gönderimi
-    function runDozaj(path, inputId, btnId, onayKey) {
+    function runDozaj(islem_adi, inputId, btnId) {
         let ml = document.getElementById(inputId).value;
-        document.getElementById(btnId).classList.add('loading');
-        db.ref('onaylar/' + onayKey).set("WAIT");
-        db.ref('kontroller/' + path).set(parseInt(ml));
+        gonderIslem(islem_adi, ml, btnId);
     }
 
     // FIREBASE GERÇEK ZAMANLI DİNLEME (Sadece giriş yapıldıktan sonra çalışır)
@@ -226,34 +229,49 @@
             document.getElementById('v_yg').innerText = data.sensorler.canli.dis_ortam.yagmur_durumu == 1 ? "YAĞIYOR" : "YOK";
         } catch(e) {}
 
-        // 2. CAM DURUMU VE LOADING KALDIRMA
-        const camDurum = data.durumlar.gercek_cam;
+        // 2. CAM DURUMU
+        const camDurum = data.durumlar ? data.durumlar.gercek_cam : 1;
         const stCam = document.getElementById('st_cam');
         stCam.innerText = camDurum == 0 ? "AÇIK" : "KAPALI";
         stCam.className = "status-tag " + (camDurum == 0 ? "tag-on" : "tag-off");
-        // Arduino'dan gerçek durum bilgisi gelince butonları serbest bırak
-        document.getElementById('btn_cam_ac').classList.remove('loading');
-        document.getElementById('btn_cam_kapat').classList.remove('loading');
 
-        // 3. POMPA DURUMU VE LOADING KALDIRMA
-        const pompaDurum = data.durumlar.gercek_pompa;
+        // 3. POMPA DURUMU
+        const pompaDurum = data.durumlar ? data.durumlar.gercek_pompa : 0;
         const stPompa = document.getElementById('st_pompa');
         stPompa.innerText = pompaDurum == 1 ? "ON" : "OFF";
         stPompa.className = "status-tag " + (pompaDurum == 1 ? "tag-on" : "tag-off");
-        document.getElementById('btn_p_ac').classList.remove('loading');
-        document.getElementById('btn_p_kap').classList.remove('loading');
 
-        // 4. DOZAJ ONAYLARI VE HATALARI
-        if(data.onaylar) {
-            if(data.onaylar.dozaj_a === "OK" || data.onaylar.dozaj_a === "ERR") document.getElementById('btn_a').classList.remove('loading');
-            if(data.onaylar.dozaj_b === "OK" || data.onaylar.dozaj_b === "ERR") document.getElementById('btn_b').classList.remove('loading');
-            if(data.onaylar.dozaj_c === "OK" || data.onaylar.dozaj_c === "ERR") document.getElementById('btn_c').classList.remove('loading');
-        }
+        // 4. SİSTEM DURUMU, HEARTBEAT VE YÜKLENME (SPINNER) KONTROLLERİ
+        if (data.sistem_durumu) {
+            // Heartbeat: 30 saniyeden eskiyse offline
+            const now = new Date().getTime();
+            const lastSeen = data.sistem_durumu.son_gorulme || 0;
+            const diff = now - lastSeen;
+            const sysStatus = document.getElementById('sys-status');
+            
+            if (diff < 30000) {
+                sysStatus.innerText = "SİSTEM ÇEVRİMİÇİ";
+                sysStatus.className = "status-tag tag-on";
+            } else {
+                sysStatus.innerText = "SİSTEM ÇEVRİMDIŞI";
+                sysStatus.className = "status-tag tag-off";
+            }
 
-        // 5. İLETİŞİM HATASI BİLDİRİMİ
-        if(data.sistem_durumu && data.sistem_durumu.son_hata === "HATA:ILETISIM_KOPTU") {
-            alert("SİSTEM HATASI: Arduino Mega ile iletişim kurulamadı! Lütfen kabloları kontrol edin.");
-            db.ref('sistem_durumu/son_hata').set(""); // Bir kez gösterdikten sonra temizle
+            // State Machine: islem_durumu OK veya ERR ise butondaki spinner'ı kaldır
+            if (data.sistem_durumu.islem_durumu === "OK" || data.sistem_durumu.islem_durumu === "ERR") {
+                const aktif = data.sistem_durumu.aktif_islem;
+                if (aktif === "CAM") { document.getElementById('btn_cam_ac').classList.remove('loading'); document.getElementById('btn_cam_kapat').classList.remove('loading'); }
+                if (aktif === "POMPA") { document.getElementById('btn_p_ac').classList.remove('loading'); document.getElementById('btn_p_kap').classList.remove('loading'); }
+                if (aktif === "DOZAJ_A") document.getElementById('btn_a').classList.remove('loading');
+                if (aktif === "DOZAJ_B") document.getElementById('btn_b').classList.remove('loading');
+                if (aktif === "DOZAJ_C") document.getElementById('btn_c').classList.remove('loading');
+            }
+
+            // Hata Kontrolü
+            if (data.sistem_durumu.son_hata === "HATA:ILETISIM_KOPTU") {
+                alert("SİSTEM HATASI: Arduino Mega ile iletişim kurulamadı!");
+                db.ref('sistem_durumu/son_hata').set(""); 
+            }
         }
     });
     }
