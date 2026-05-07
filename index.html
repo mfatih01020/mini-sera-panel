@@ -290,25 +290,98 @@
     function baslatUygulama() {
         db.ref().on('value', s => {
             const data = s.val();
-            if (data.sistem_durumu.son_hata && data.sistem_durumu.son_hata.startsWith("HATA:")) {
-                const hataKodu = data.sistem_durumu.son_hata;
-                let mesaj = "Bilinmeyen Bir Hata Oluştu.";
+            if (!data) return;
 
-                if (hataKodu === "HATA:ILETISIM_KOPTU") mesaj = "ERR_01: BAĞLANTI_KOPTU - NodeMCU ile Mega arası donanımsal iletişim kesildi. Lütfen seri kabloları kontrol edin.";
-                else if (hataKodu === "HATA:ERR00") mesaj = "ERR_00: BİLİNMEYEN_KOMUT - Gönderilen komut Mega kartı tarafından anlaşılamadı.";
-                else if (hataKodu === "HATA:ERR02") mesaj = "ERR_02: GECERSİZ_VERİ - Dozaj B motoru için tanımlanan ml değeri çok düşük veya çok yüksek.";
-                else if (hataKodu === "HATA:ERR03") mesaj = "ERR_03: MOTOR_ZAMAN_ASIMI - Dozaj A (Motor 1) maksimum çalışma süresini aştı! Su bitmiş veya hortum tıkanmış olabilir. Motor güvenlik amacıyla kilitlendi.";
-                else if (hataKodu === "HATA:ERR04") mesaj = "ERR_04: MOTOR_ZAMAN_ASIMI - Dozaj B (Motor 2) maksimum çalışma süresini aştı! Su bitmiş veya hortum tıkanmış olabilir. Motor güvenlik amacıyla kilitlendi.";
-                else if (hataKodu === "HATA:ERR05") mesaj = "ERR_05: GECERSİZ_VERİ - Dozaj C motoru için tanımlanan ml değeri çok düşük veya çok yüksek.";
-                else if (hataKodu === "HATA:ERR06") mesaj = "ERR_06: MOTOR_ZAMAN_ASIMI - Dozaj C (Motor 3) maksimum çalışma süresini aştı! Su bitmiş veya hortum tıkanmış olabilir. Motor güvenlik amacıyla kilitlendi.";
-                else if (hataKodu === "HATA:ERR07") mesaj = "ERR_07: ANA_POMPA_ZAMAN_ASIMI - Ana Pompa çok uzun süredir çalışıyor. Su taşmasını engellemek için sistem güvenlik kilitlenmesi yaşadı.";
-                else mesaj = "SİSTEM ALARMI: " + hataKodu;
+            // 1. SENSÖR VERİLERİ VE ARIZA KONTROLÜ
+            if (data.sensorlar) {
+                const valCheck = (id, val, unit = "") => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    if (val === -999) {
+                        el.innerText = "ARIZA";
+                        el.style.color = "red";
+                    } else {
+                        el.innerText = (val !== undefined) ? val + unit : "--";
+                        el.style.color = "white";
+                    }
+                };
 
-                alert("SİSTEM UYARISI!\n\n" + mesaj);
-                db.ref('sistem_durumu/son_hata').set(""); // Bir kez gösterdikten sonra temizle
+                // Su Seviyesi
+                let su_y = data.sensorlar.su_seviyesi_yuzde;
+                let su_c = data.sensorlar.su_seviyesi_cm;
+                if (su_y === -999 || su_c === -999) {
+                    document.getElementById('v_su').innerText = "ARIZA";
+                    document.getElementById('v_su').style.color = "red";
+                } else {
+                    let y = su_y > 100 ? 100 : (su_y < 0 ? 0 : su_y);
+                    document.getElementById('v_su').innerText = "%" + y + " (" + su_c + " cm)";
+                    document.getElementById('v_su').style.color = "white";
+                }
+
+                // İç Ortam ve Su
+                valCheck('v_is', data.sensorlar.ic_sicaklik, " °C");
+                valCheck('v_in', data.sensorlar.ic_nem, " %");
+                valCheck('v_ip', data.sensorlar.ic_basinc, " hPa");
+                valCheck('v_ss', data.sensorlar.su_sicakligi, " °C");
+                valCheck('v_tds', data.sensorlar.tds_degeri, " ppm");
+                valCheck('v_ph', data.sensorlar.ph_degeri, "");
+
+                // Dış Ortam
+                valCheck('v_ds', data.sensorlar.dis_sicaklik, " °C");
+                valCheck('v_dn', data.sensorlar.dis_nem, " %");
+                valCheck('v_db', data.sensorlar.dis_basinc, " hPa");
+                const rainEl = document.getElementById('v_yagmur');
+                if(rainEl) rainEl.innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
+
+                // Zaman Güncellemeleri
+                const curTime = data.sensorlar.son_guncelleme || "--:--";
+                const vSaat = document.getElementById('v_saat');
+                if(vSaat) vSaat.innerText = curTime;
+                const timeEls = document.getElementsByClassName('v_time');
+                for (let el of timeEls) { el.innerText = curTime; }
             }
-        }
-    });
+
+            // 2. KONTROL GERİ BİLDİRİMLERİ (Spinner Temizliği)
+            if (data.sistem_durumu) {
+                // Heartbeat
+                const lastSeen = data.sistem_durumu.son_gorulme || 0;
+                const diff = Date.now() - lastSeen;
+                const sysStatus = document.getElementById('sys-status');
+                if (sysStatus) {
+                    if (diff < 30000) {
+                        sysStatus.innerText = "SİSTEM ÇEVRİMİÇİ";
+                        sysStatus.className = "status-tag tag-on";
+                    } else {
+                        sysStatus.innerText = "SİSTEM ÇEVRİMDIŞI";
+                        sysStatus.className = "status-tag tag-off";
+                    }
+                }
+
+                // Spinner kaldır
+                if (data.sistem_durumu.islem_durumu === "OK" || data.sistem_durumu.islem_durumu === "ERR") {
+                    const aktif = data.sistem_durumu.aktif_islem;
+                    const btnIds = {
+                        'CAM': ['btn_cam_ac', 'btn_cam_kapat'],
+                        'POMPA': ['btn_pompa_ac', 'btn_pompa_kapat'],
+                        'DOZAJ_A': ['btn_a'],
+                        'DOZAJ_B': ['btn_b'],
+                        'DOZAJ_C': ['btn_c']
+                    };
+                    if (btnIds[aktif]) {
+                        btnIds[aktif].forEach(id => {
+                            const b = document.getElementById(id);
+                            if(b) b.classList.remove('loading');
+                        });
+                    }
+                }
+
+                // Hata Gösterimi
+                if (data.sistem_durumu.son_hata && data.sistem_durumu.son_hata.startsWith("HATA:")) {
+                    alert("SİSTEM UYARISI!\n\n" + data.sistem_durumu.son_hata);
+                    db.ref('sistem_durumu/son_hata').set(""); 
+                }
+            }
+        });
     }
 
     // Canlı Saat
