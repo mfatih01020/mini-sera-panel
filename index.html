@@ -243,10 +243,18 @@
         document.getElementById('btn_p_ac').classList.remove('loading');
         document.getElementById('btn_p_kap').classList.remove('loading');
 
-        // 4. DOZAJ ONAYLARI
-        if(data.onaylar && data.onaylar.dozaj_a === "OK") document.getElementById('btn_a').classList.remove('loading');
-        if(data.onaylar && data.onaylar.dozaj_b === "OK") document.getElementById('btn_b').classList.remove('loading');
-        if(data.onaylar && data.onaylar.dozaj_c === "OK") document.getElementById('btn_c').classList.remove('loading');
+        // 4. DOZAJ ONAYLARI VE HATALARI
+        if(data.onaylar) {
+            if(data.onaylar.dozaj_a === "OK" || data.onaylar.dozaj_a === "ERR") document.getElementById('btn_a').classList.remove('loading');
+            if(data.onaylar.dozaj_b === "OK" || data.onaylar.dozaj_b === "ERR") document.getElementById('btn_b').classList.remove('loading');
+            if(data.onaylar.dozaj_c === "OK" || data.onaylar.dozaj_c === "ERR") document.getElementById('btn_c').classList.remove('loading');
+        }
+
+        // 5. İLETİŞİM HATASI BİLDİRİMİ
+        if(data.sistem_durumu && data.sistem_durumu.son_hata === "HATA:ILETISIM_KOPTU") {
+            alert("SİSTEM HATASI: Arduino Mega ile iletişim kurulamadı! Lütfen kabloları kontrol edin.");
+            db.ref('sistem_durumu/son_hata').set(""); // Bir kez gösterdikten sonra temizle
+        }
     });
     }
 
