@@ -30,7 +30,7 @@
         .control-row { background: #0d1117; padding: 12px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #21262d; }
         .btn-group { display: flex; gap: 8px; margin-top: 8px; }
         
-        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; }
+        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; z-index: 10; pointer-events: auto !important; }
         .btn:disabled { opacity: 0.5; }
         .btn-green { background: var(--green); }
         .btn-red { background: var(--red); }
@@ -288,8 +288,17 @@
         });
     }
 
-    function runAction(islem_adi, value, btnId) { gonderIslem(islem_adi, value, btnId); }
-    function runDozaj(islem_adi, inputId, btnId) { gonderIslem(islem_adi, document.getElementById(inputId).value, btnId); }
+    function runAction(islem_adi, value, btnId) { 
+        console.log("Button clicked:", islem_adi);
+        // alert(islem_adi + " komutu gonderiliyor..."); 
+        gonderIslem(islem_adi, value, btnId); 
+    }
+    function runDozaj(islem_adi, inputId, btnId) { 
+        const val = document.getElementById(inputId).value;
+        console.log("Dozaj clicked:", islem_adi, val);
+        // alert(islem_adi + " (" + val + " ml) gonderiliyor...");
+        gonderIslem(islem_adi, val, btnId); 
+    }
 
     function acAdminPaneli() {
         const pin = prompt("Admin PIN:");
