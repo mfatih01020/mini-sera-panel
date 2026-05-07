@@ -109,6 +109,10 @@
         <div class="sensor-group">
             <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
             <div class="sensor-item"><span class="sensor-label">NEM</span><span id="v_in" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">TDS</span><span id="v_tds" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">PH</span><span id="v_ph" class="sensor-value">--</span></div>
         </div>
         <div class="control-row" style="margin-top:15px;">
             <div style="display:flex; justify-content:space-between;">
@@ -418,40 +422,46 @@
         // 1. SENSÖR VERİLERİ (Eski UI Yerleşimi)
         // 1. SENSÖR VERİLERİ
         try {
-            // Mevcut veriler
-            if(data.sensorler.canli) {
-                if(data.sensorler.canli.ic_ortam) {
-                    document.getElementById('v_is').innerText = (data.sensorler.canli.ic_ortam.sicaklik || "--") + "°C";
-                    document.getElementById('v_in').innerText = "%" + (data.sensorler.canli.ic_ortam.nem || "--");
-                }
-            }
-            
-            // Yeni Sensör Verileri (Arduino Mega'dan Gelen)
             if(data.sensorlar) {
-                let yuzde = (data.sensorlar.su_seviyesi_yuzde !== undefined) ? data.sensorlar.su_seviyesi_yuzde : 0;
-                const cm = data.sensorlar.su_seviyesi_cm;
+                // --- FONKSİYON: Değer Arıza Kontrolü ---
+                const valCheck = (id, val, unit = "") => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    if (val === -999) {
+                        el.innerText = "ARIZA";
+                        el.style.color = "red";
+                    } else {
+                        el.innerText = (val !== undefined) ? val + unit : "--";
+                        el.style.color = "white";
+                    }
+                };
 
-                if (cm === -999 || yuzde === -999) {
+                // Su Seviyesi Özel (Yüzde Hesabı İçin)
+                let su_y = data.sensorlar.su_seviyesi_yuzde;
+                let su_c = data.sensorlar.su_seviyesi_cm;
+                if (su_y === -999 || su_c === -999) {
                     document.getElementById('v_su').innerText = "SENSÖR ARIZASI";
                     document.getElementById('v_su').style.color = "red";
                 } else {
-                    if (yuzde > 100) yuzde = 100;
-                    if (yuzde < 0) yuzde = 0;
-                    document.getElementById('v_su').innerText = "%" + yuzde + " (" + cm + " cm)";
+                    let y = su_y > 100 ? 100 : (su_y < 0 ? 0 : su_y);
+                    document.getElementById('v_su').innerText = "%" + y + " (" + su_c + " cm)";
                     document.getElementById('v_su').style.color = "var(--accent)";
                 }
 
+                // İç Ortam
+                valCheck('v_is', data.sensorlar.ic_sicaklik, " °C");
+                valCheck('v_in', data.sensorlar.ic_nem, " %");
+                valCheck('v_ip', data.sensorlar.ic_basinc, " hPa");
+                valCheck('v_ss', data.sensorlar.su_sicakligi, " °C");
+                valCheck('v_tds', data.sensorlar.tds_degeri, " ppm");
+                valCheck('v_ph', data.sensorlar.ph_degeri, "");
+
+                // Dış Ortam
+                valCheck('v_ds', data.sensorlar.dis_sicaklik, " °C");
+                valCheck('v_dn', data.sensorlar.dis_nem, " %");
+                valCheck('v_db', data.sensorlar.dis_basinc, " hPa");
+
                 document.getElementById('v_yagmur').innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
-                
-                let tds = data.sensorlar.tds_degeri;
-                if (tds === -999) {
-                    document.getElementById('v_tds').innerText = "ARIZA";
-                    document.getElementById('v_tds').style.color = "red";
-                } else {
-                    document.getElementById('v_tds').innerText = (tds !== undefined) ? tds + " ppm" : "--";
-                    document.getElementById('v_tds').style.color = "white";
-                }
-                
                 document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
             }
 
