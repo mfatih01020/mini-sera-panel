@@ -177,33 +177,26 @@
         </div>
     </div>
 
-    <!-- KALİBRASYON KARTI -->
-    <div class="card">
-        <div class="card-header"><span><i class="fas fa-sliders-h"></i> SU TANKI KALİBRASYONU</span></div>
-        <div class="control-row">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label title="Tank tamamen boşken sensörün okuduğu mesafe">Boş Tank Mesafesi:</label>
-                <div><input type="number" id="cal_max" value="100"> cm</div>
-            </div>
-        </div>
-        <div class="control-row">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label title="Tank tamamen doluyken sensörün okuduğu mesafe">Dolu Tank Mesafesi:</label>
-                <div><input type="number" id="cal_min" value="10"> cm</div>
-            </div>
-        </div>
-        <button class="btn btn-blue" style="width:100%;" onclick="kaydetKalibrasyon()">
-            <span class="btn-text"><i class="fas fa-save"></i> AYARLARI KAYDET</span>
-        </button>
-        <p style="font-size: 0.7rem; opacity: 0.6; margin-top: 10px; text-align: center;">
-            * Değerleri değiştirdiğinizde sistem otomatik olarak kalibre edilecektir.
-        </p>
-    </div>
-
-    <!-- ADMİN PANELİ: BİTKİ LİMİTLERİ -->
+    <!-- ADMİN PANELİ -->
     <div class="card" style="grid-column: 1 / -1;">
-        <div class="card-header"><span><i class="fas fa-user-cog"></i> ADMİN PANELİ: BİTKİ LİMİT AYARLARI</span></div>
+        <div class="card-header"><span><i class="fas fa-user-cog"></i> ADMİN PANELİ: SİSTEM AYARLARI</span></div>
+        
+        <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-water"></i> Su Tankı Kalibrasyonu</p>
+            <div class="limit-row">
+                <span title="Tank tamamen boşken sensörün okuduğu mesafe">Boş Tank Mesafesi (cm)</span>
+                <input type="number" id="cal_max" value="100">
+                <span></span>
+            </div>
+            <div class="limit-row">
+                <span title="Tank tamamen doluyken sensörün okuduğu mesafe">Dolu Tank Mesafesi (cm)</span>
+                <input type="number" id="cal_min" value="10">
+                <span></span>
+            </div>
+        </div>
+
         <div class="sensor-group" style="grid-template-columns: 1fr;">
+            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-leaf"></i> Bitki Limit Ayarları</p>
             <div class="limit-row">
                 <span>PARAMETRE</span>
                 <span>MİNİMUM</span>
@@ -230,8 +223,8 @@
                 <input type="number" id="lim_nem_max" value="80">
             </div>
         </div>
-        <button class="btn btn-green" style="width:100%; margin-top: 15px;" onclick="kaydetLimitler()">
-            <span class="btn-text"><i class="fas fa-check-circle"></i> LİMİTLERİ UYGULA VE KAYDET</span>
+        <button class="btn btn-green" style="width:100%; margin-top: 15px;" onclick="kaydetTumAyarlar()">
+            <span class="btn-text"><i class="fas fa-save"></i> TÜM AYARLARI KAYDET VE UYGULA</span>
         </button>
     </div>
 </div>
@@ -290,38 +283,46 @@
         gonderIslem(islem_adi, ml, btnId);
     }
 
-    function kaydetKalibrasyon() {
-        const max_dist = parseInt(document.getElementById('cal_max').value);
-        const min_dist = parseInt(document.getElementById('cal_min').value);
-        
-        if (isNaN(max_dist) || isNaN(min_dist)) {
-            alert("Lütfen geçerli sayılar girin!");
-            return;
-        }
-
-        db.ref('ayarlar/su_tanki').update({
-            max_mesafe: max_dist,
-            min_mesafe: min_dist
-        }).then(() => {
-            alert("Kalibrasyon ayarları gönderildi. Sistemin güncellenmesi birkaç saniye sürebilir.");
-        });
-    }
-
-    function kaydetLimitler() {
-        const limits = {
-            ph: { min: parseFloat(document.getElementById('lim_ph_min').value), max: parseFloat(document.getElementById('lim_ph_max').value) },
-            tds: { min: parseInt(document.getElementById('lim_tds_min').value), max: parseInt(document.getElementById('lim_tds_max').value) },
-            temp: { min: parseInt(document.getElementById('lim_temp_min').value), max: parseInt(document.getElementById('lim_temp_max').value) },
-            nem: { min: parseInt(document.getElementById('lim_nem_min').value), max: parseInt(document.getElementById('lim_nem_max').value) }
+    function kaydetTumAyarlar() {
+        const settings = {
+            su_tanki: {
+                max_mesafe: parseInt(document.getElementById('cal_max').value),
+                min_mesafe: parseInt(document.getElementById('cal_min').value)
+            },
+            limitler: {
+                ph: { min: parseFloat(document.getElementById('lim_ph_min').value), max: parseFloat(document.getElementById('lim_ph_max').value) },
+                tds: { min: parseInt(document.getElementById('lim_tds_min').value), max: parseInt(document.getElementById('lim_tds_max').value) },
+                temp: { min: parseInt(document.getElementById('lim_temp_min').value), max: parseInt(document.getElementById('lim_temp_max').value) },
+                nem: { min: parseInt(document.getElementById('lim_nem_min').value), max: parseInt(document.getElementById('lim_nem_max').value) }
+            }
         };
 
-        db.ref('ayarlar/limitler').update(limits).then(() => {
-            alert("Yeni bitki limitleri kaydedildi ve sisteme gönderildi.");
+        db.ref('ayarlar').update(settings).then(() => {
+            alert("Tüm ayarlar kaydedildi ve sisteme gönderildi.");
         });
     }
 
     // FIREBASE GERÇEK ZAMANLI DİNLEME (Sadece giriş yapıldıktan sonra çalışır)
     function baslatUygulama() {
+        // AYARLARI BİR KEZ ÇEK (Açılışta kutuları doldurmak için)
+        db.ref('ayarlar').once('value', s => {
+            const settings = s.val();
+            if(!settings) return;
+            if(settings.su_tanki) {
+                document.getElementById('cal_max').value = settings.su_tanki.max_mesafe;
+                document.getElementById('cal_min').value = settings.su_tanki.min_mesafe;
+            }
+            if(settings.limitler) {
+                const lim = settings.limitler;
+                const ids = ['lim_ph_min', 'lim_ph_max', 'lim_tds_min', 'lim_tds_max', 'lim_temp_min', 'lim_temp_max', 'lim_nem_min', 'lim_nem_max'];
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    const [key, sub] = id.split('_').slice(1);
+                    if (lim[key]) el.value = lim[key][sub];
+                });
+            }
+        });
+
         db.ref().on('value', s => {
             const data = s.val();
             if(!data) return;
@@ -347,39 +348,21 @@
                 document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
             }
 
-            // Ayarları Geri Yükle (Sadece kullanıcı odaklanmamışsa güncelle)
-            if(data.ayarlar) {
-                if(data.ayarlar.su_tanki) {
-                    const maxInput = document.getElementById('cal_max');
-                    const minInput = document.getElementById('cal_min');
-                    if (document.activeElement !== maxInput) maxInput.value = data.ayarlar.su_tanki.max_mesafe;
-                    if (document.activeElement !== minInput) minInput.value = data.ayarlar.su_tanki.min_mesafe;
+            // Limit Kontrolü ve Görsel Uyarılar
+            if(data.ayarlar && data.ayarlar.limitler) {
+                const lim = data.ayarlar.limitler;
+                if(data.sensorlar && data.sensorlar.tds_degeri !== undefined) {
+                    const tds = data.sensorlar.tds_degeri;
+                    const tdsEl = document.getElementById('v_tds');
+                    if (tds < lim.tds.min || tds > lim.tds.max) tdsEl.classList.add('alert-text'); else tdsEl.classList.remove('alert-text');
                 }
-                
-                if(data.ayarlar.limitler) {
-                    const lim = data.ayarlar.limitler;
-                    // Giriş kutularını güncelle (odaklı değilse)
-                    const ids = ['lim_ph_min', 'lim_ph_max', 'lim_tds_min', 'lim_tds_max', 'lim_temp_min', 'lim_temp_max', 'lim_nem_min', 'lim_nem_max'];
-                    ids.forEach(id => {
-                        const el = document.getElementById(id);
-                        const [key, sub] = id.split('_').slice(1);
-                        if (document.activeElement !== el && lim[key]) el.value = lim[key][sub];
-                    });
-
-                    // Limit Kontrolü ve Görsel Uyarılar
-                    if(data.sensorlar && data.sensorlar.su_seviyesi_yuzde !== undefined) {
-                        const tds = data.sensorlar.tds_degeri;
-                        const tdsEl = document.getElementById('v_tds');
-                        if (tds < lim.tds.min || tds > lim.tds.max) tdsEl.classList.add('alert-text'); else tdsEl.classList.remove('alert-text');
-                    }
-                    if(data.sensorler && data.sensorler.canli && data.sensorler.canli.ic_ortam) {
-                        const t = data.sensorler.canli.ic_ortam.sicaklik;
-                        const n = data.sensorler.canli.ic_ortam.nem;
-                        const tEl = document.getElementById('v_is');
-                        const nEl = document.getElementById('v_in');
-                        if (t < lim.temp.min || t > lim.temp.max) tEl.classList.add('alert-text'); else tEl.classList.remove('alert-text');
-                        if (n < lim.nem.min || n > lim.nem.max) nEl.classList.add('alert-text'); else nEl.classList.remove('alert-text');
-                    }
+                if(data.sensorler && data.sensorler.canli && data.sensorler.canli.ic_ortam) {
+                    const t = data.sensorler.canli.ic_ortam.sicaklik;
+                    const n = data.sensorler.canli.ic_ortam.nem;
+                    const tEl = document.getElementById('v_is');
+                    const nEl = document.getElementById('v_in');
+                    if (t < lim.temp.min || t > lim.temp.max) tEl.classList.add('alert-text'); else tEl.classList.remove('alert-text');
+                    if (n < lim.nem.min || n > lim.nem.max) nEl.classList.add('alert-text'); else nEl.classList.remove('alert-text');
                 }
             }
         } catch(e) { console.log("Sensor okuma hatasi:", e); }
