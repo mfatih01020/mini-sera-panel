@@ -273,11 +273,18 @@
     }
 
     function gonderIslem(aktif_islem, islem_verisi, btnId) {
-        document.getElementById(btnId).classList.add('loading');
+        const btn = document.getElementById(btnId);
+        if (btn) btn.classList.add('loading');
+
         db.ref('sistem_durumu').update({
             aktif_islem: aktif_islem,
             islem_verisi: parseInt(islem_verisi),
             islem_durumu: "WAIT"
+        }).then(() => {
+            console.log("Komut gonderildi: " + aktif_islem);
+        }).catch((error) => {
+            if (btn) btn.classList.remove('loading');
+            alert("GÖNDERİM HATASI!\nFirebase veritabanına yazılamadı.\nLütfen gerçek e-posta hesabınızla giriş yaptığınızdan emin olun.\n\nHata: " + error.message);
         });
     }
 
