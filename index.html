@@ -104,94 +104,86 @@
 </header>
 
 <div class="container">
+    <!-- İÇ ORTAM VE SU -->
     <div class="card">
-        <div class="card-header"><span>İÇ ORTAM</span></div>
-        <div class="sensor-group">
-            <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">NEM</span><span id="v_in" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">TDS</span><span id="v_tds" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">PH</span><span id="v_ph" class="sensor-value">--</span></div>
+        <div class="card-header">
+            <span><i class="fas fa-home"></i> İÇ ORTAM VE SU</span>
+            <span style="font-size: 0.6rem; opacity: 0.5;">Güncelleme: <span class="v_time">--:--</span></span>
         </div>
-        <div class="control-row" style="margin-top:15px;">
-            <div style="display:flex; justify-content:space-between;">
-                <span>Cam: <span id="st_cam" class="status-tag tag-off">...</span></span>
-            </div>
-            <div class="btn-group">
-                <button id="btn_cam_ac" class="btn btn-green" onclick="runAction('CAM', 0, 'btn_cam_ac')">
-                    <div class="spinner"></div><span class="btn-text">AÇ</span>
-                </button>
-                <button id="btn_cam_kapat" class="btn btn-red" onclick="runAction('CAM', 1, 'btn_cam_kapat')">
-                    <div class="spinner"></div><span class="btn-text">KAPAT</span>
-                </button>
-            </div>
+        <div class="sensor-group">
+            <div class="sensor-item"><span class="sensor-label">HAVA SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">HAVA NEM</span><span id="v_in" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">HAVA BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">TDS (GÜBRE)</span><span id="v_tds" class="sensor-value">--</span></div>
+            <div class="sensor-item"><span class="sensor-label">PH DEĞERİ</span><span id="v_ph" class="sensor-value">--</span></div>
         </div>
     </div>
 
+    <!-- DIŞ ORTAM -->
     <div class="card">
-        <div class="card-header"><span>DIŞ ORTAM</span></div>
+        <div class="card-header">
+            <span><i class="fas fa-cloud-sun"></i> DIŞ ORTAM</span>
+            <span style="font-size: 0.6rem; opacity: 0.5;">Güncelleme: <span class="v_time">--:--</span></span>
+        </div>
         <div class="sensor-group">
             <div class="sensor-item"><span class="sensor-label">SICAKLIK</span><span id="v_ds" class="sensor-value">--</span></div>
             <div class="sensor-item"><span class="sensor-label">NEM</span><span id="v_dn" class="sensor-value">--</span></div>
             <div class="sensor-item"><span class="sensor-label">BASINÇ</span><span id="v_db" class="sensor-value">--</span></div>
-        </div>
-        <p style="font-size:0.7rem; opacity:0.6; margin-top:10px; text-align:center;">Hava İstasyonu Verileri</p>
-    </div>
-
-    <div class="card">
-        <div class="card-header"><span>DOZAJ SİSTEMİ</span></div>
-        
-        <div class="control-row">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Gübre A:</label>
-                <div><input type="number" id="val_a" value="10"> ml</div>
-            </div>
-            <button id="btn_a" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('DOZAJ_A', 'val_a', 'btn_a')">
-                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
-            </button>
-        </div>
-
-        <div class="control-row">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Gübre B:</label>
-                <div><input type="number" id="val_b" value="10"> ml</div>
-            </div>
-            <button id="btn_b" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('DOZAJ_B', 'val_b', 'btn_b')">
-                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
-            </button>
-        </div>
-
-        <div class="control-row">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Gübre C:</label>
-                <div><input type="number" id="val_c" value="10"> ml</div>
-            </div>
-            <button id="btn_c" class="btn btn-blue" style="width:100%; margin-top:8px;" onclick="runDozaj('DOZAJ_C', 'val_c', 'btn_c')">
-                <div class="spinner"></div><span class="btn-text">GÖNDER</span>
-            </button>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header"><span>SİSTEM ANALİZİ</span></div>
-        <div class="sensor-group">
-            <div class="sensor-item"><span class="sensor-label">TDS DEĞERİ</span><span id="v_tds" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
-            <div class="sensor-item"><span class="sensor-label">SİSTEM SAATİ</span><span id="v_saat" class="sensor-value">--</span></div>
             <div class="sensor-item"><span class="sensor-label">YAĞMUR</span><span id="v_yagmur" class="sensor-value">--</span></div>
         </div>
-        <div class="control-row" style="margin-top:15px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
-                <span>Pompa: <span id="st_pompa" class="status-tag tag-off">...</span></span>
+        <div style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; text-align:center;">
+            <span style="font-size:0.7rem; opacity:0.6;">SİSTEM SAATİ: <span id="v_saat">--:--:--</span></span>
+        </div>
+    </div>
+
+    <!-- KONTROL MERKEZİ -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header"><span><i class="fas fa-gamepad"></i> KONTROL MERKEZİ (MANUEL)</span></div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+            <div class="control-row">
+                <span style="font-size: 0.8rem; color: var(--accent);"><i class="fas fa-wind"></i> HAVALANDIRMA (CAM)</span>
+                <div class="btn-group">
+                    <button id="btn_cam_ac" class="btn btn-green" onclick="runAction('CAM', 0, 'btn_cam_ac')">AÇ</button>
+                    <button id="btn_cam_kapat" class="btn btn-red" onclick="runAction('CAM', 1, 'btn_cam_kapat')">KAPAT</button>
+                </div>
             </div>
-            <div class="btn-group">
-                <button id="btn_p_ac" class="btn btn-green" onclick="runAction('POMPA', 1, 'btn_p_ac')">
-                    <div class="spinner"></div><span class="btn-text">BAŞLAT</span>
-                </button>
-                <button id="btn_p_kap" class="btn btn-red" onclick="runAction('POMPA', 0, 'btn_p_kap')">
-                    <div class="spinner"></div><span class="btn-text">DURDUR</span>
-                </button>
+            <div class="control-row">
+                <span style="font-size: 0.8rem; color: var(--accent);"><i class="fas fa-faucet"></i> ANA SU POMPASI</span>
+                <div class="btn-group">
+                    <button id="btn_pompa_ac" class="btn btn-green" onclick="runAction('POMPA', 1, 'btn_pompa_ac')">AÇ</button>
+                    <button id="btn_pompa_kapat" class="btn btn-red" onclick="runAction('POMPA', 0, 'btn_pompa_kapat')">KAPAT</button>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-vial"></i> DOZAJ SİSTEMİ</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+            <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
+                <p style="font-size:0.7rem; margin-bottom:5px;">DOZAJ A (PH)</p>
+                <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:5px;">
+                    <input type="number" id="val_a" value="10" style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #444; color:white; text-align:center;">
+                    <span style="font-size:0.7rem;">ml</span>
+                </div>
+                <button id="btn_a" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_A', 'val_a', 'btn_a')">GÖNDER</button>
+            </div>
+            <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
+                <p style="font-size:0.7rem; margin-bottom:5px;">DOZAJ B (TDS)</p>
+                <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:5px;">
+                    <input type="number" id="val_b" value="10" style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #444; color:white; text-align:center;">
+                    <span style="font-size:0.7rem;">ml</span>
+                </div>
+                <button id="btn_b" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_B', 'val_b', 'btn_b')">GÖNDER</button>
+            </div>
+            <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
+                <p style="font-size:0.7rem; margin-bottom:5px;">DOZAJ C (GÜBRE)</p>
+                <div style="display:flex; align-items:center; justify-content:center; gap:5px; margin-bottom:5px;">
+                    <input type="number" id="val_c" value="10" style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #444; color:white; text-align:center;">
+                    <span style="font-size:0.7rem;">ml</span>
+                </div>
+                <button id="btn_c" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_C', 'val_c', 'btn_c')">GÖNDER</button>
             </div>
         </div>
     </div>
@@ -207,21 +199,21 @@
             <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-flask"></i> Dozaj Pompası Kalibrasyon Labı</p>
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
                 <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
-                    <p style="font-size:0.8rem;">MOTOR A (PH)</p>
+                    <p style="font-size:0.8rem;">MOTOR A</p>
                     <button class="btn btn-green" style="padding:5px; font-size:0.7rem;" onclick="calMotorStart('A')">BAŞLAT</button>
                     <button class="btn btn-red" style="padding:5px; font-size:0.7rem;" onclick="calMotorStop('A')">DURDUR</button>
                     <input type="number" id="cal_m1_ml" placeholder="Ölçülen ml" style="width:100%; margin-top:5px; font-size:0.8rem;">
                     <button class="btn btn-blue" style="width:100%; font-size:0.7rem; margin-top:5px;" onclick="calMotorSave('A')">KAYDET</button>
                 </div>
                 <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
-                    <p style="font-size:0.8rem;">MOTOR B (TDS)</p>
+                    <p style="font-size:0.8rem;">MOTOR B</p>
                     <button class="btn btn-green" style="padding:5px; font-size:0.7rem;" onclick="calMotorStart('B')">BAŞLAT</button>
                     <button class="btn btn-red" style="padding:5px; font-size:0.7rem;" onclick="calMotorStop('B')">DURDUR</button>
                     <input type="number" id="cal_m2_ml" placeholder="Ölçülen ml" style="width:100%; margin-top:5px; font-size:0.8rem;">
                     <button class="btn btn-blue" style="width:100%; font-size:0.7rem; margin-top:5px;" onclick="calMotorSave('B')">KAYDET</button>
                 </div>
                 <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
-                    <p style="font-size:0.8rem;">MOTOR C (GÜBRE)</p>
+                    <p style="font-size:0.8rem;">MOTOR C</p>
                     <button class="btn btn-green" style="padding:5px; font-size:0.7rem;" onclick="calMotorStart('C')">BAŞLAT</button>
                     <button class="btn btn-red" style="padding:5px; font-size:0.7rem;" onclick="calMotorStop('C')">DURDUR</button>
                     <input type="number" id="cal_m3_ml" placeholder="Ölçülen ml" style="width:100%; margin-top:5px; font-size:0.8rem;">
@@ -229,56 +221,8 @@
                 </div>
             </div>
         </div>
-
-        <div style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
-            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-tools"></i> Sensör Kalibrasyon (Sapma/Offset)</p>
-            <div class="limit-row" style="font-size:0.7rem; opacity:0.6;">
-                <span>SENSÖR</span>
-                <span>İÇ ORTAM</span>
-                <span>DIŞ ORTAM</span>
-            </div>
-            <div class="limit-row">
-                <span>SICAKLIK (°C)</span>
-                <input type="number" id="off_it" step="0.1" value="0">
-                <input type="number" id="off_dt" step="0.1" value="0">
-            </div>
-            <div class="limit-row">
-                <span>NEM (%)</span>
-                <input type="number" id="off_in" step="0.1" value="0">
-                <input type="number" id="off_dn" step="0.1" value="0">
-            </div>
-        </div>
-
-        <div class="sensor-group" style="grid-template-columns: 1fr;">
-            <p style="font-weight: bold; color: var(--accent); margin-bottom: 10px;"><i class="fas fa-leaf"></i> Bitki Limit Ayarları</p>
-            <div class="limit-row">
-                <span>PARAMETRE</span>
-                <span>MİNİMUM</span>
-                <span>MAKSİMUM</span>
-            </div>
-            <div class="limit-row">
-                <span class="limit-label">PH DEĞERİ</span>
-                <input type="number" id="lim_ph_min" step="0.1" value="5.5">
-                <input type="number" id="lim_ph_max" step="0.1" value="6.5">
-            </div>
-            <div class="limit-row">
-                <span class="limit-label">TDS (PPM)</span>
-                <input type="number" id="lim_tds_min" value="500">
-                <input type="number" id="lim_tds_max" value="1200">
-            </div>
-            <div class="limit-row">
-                <span class="limit-label">SICAKLIK (°C)</span>
-                <input type="number" id="lim_temp_min" value="18">
-                <input type="number" id="lim_temp_max" value="28">
-            </div>
-            <div class="limit-row">
-                <span class="limit-label">NEM (%)</span>
-                <input type="number" id="lim_nem_min" value="40">
-                <input type="number" id="lim_nem_max" value="80">
-            </div>
-        </div>
         <button class="btn btn-green" style="width:100%; margin-top: 15px;" onclick="kaydetTumAyarlar()">
-            <span class="btn-text"><i class="fas fa-save"></i> TÜM AYARLARI KAYDET VE UYGULA</span>
+            <span class="btn-text"><i class="fas fa-save"></i> TÜM AYARLARI KAYDET</span>
         </button>
     </div>
 </div>
@@ -298,14 +242,13 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
-    // FIREBASE AUTH MANTIĞI
     function checkLogin() {
         const email = document.getElementById('login-email').value;
         const pwd = document.getElementById('login-pwd').value;
         if (!email || !pwd) return;
 
         auth.signInWithEmailAndPassword(email, pwd)
-            .then((userCredential) => {
+            .then(() => {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
                 baslatUygulama();
@@ -318,7 +261,6 @@
             });
     }
 
-    // Devlet Makinesi (State Machine) İşlem Gönderimi
     function gonderIslem(aktif_islem, islem_verisi, btnId) {
         document.getElementById(btnId).classList.add('loading');
         db.ref('sistem_durumu').update({
@@ -328,201 +270,19 @@
         });
     }
 
-    function runAction(islem_adi, value, btnId) {
-        gonderIslem(islem_adi, value, btnId);
-    }
-
-    function runDozaj(islem_adi, inputId, btnId) {
-        let ml = document.getElementById(inputId).value;
-        gonderIslem(islem_adi, ml, btnId);
-    }
-
-    // DOZAJ KALİBRASYON LABI
-    let calStartTime = 0;
-    function calMotorStart(m) {
-        calStartTime = Date.now();
-        db.ref('sistem_durumu').update({ aktif_islem: "DOZAJ_" + m, islem_verisi: 9999, islem_durumu: "WAIT" });
-    }
-    function calMotorStop(m) {
-        const duration = Date.now() - calStartTime;
-        db.ref('sistem_durumu').update({ aktif_islem: "POMPA_KAPAT", islem_durumu: "WAIT" }); // Durdurmak için pompa kapat yolla
-        window["lastCalDuration_" + m] = duration;
-        alert(m + " Motoru " + (duration/1000).toFixed(2) + " saniye çalıştı. Lütfen kaptaki ml değerini girip KAYDET'e basın.");
-    }
-    function calMotorSave(m) {
-        const ml = parseFloat(document.getElementById('cal_m' + (m=='A'?1:m=='B'?2:3) + '_ml').value);
-        if(!ml || ml <= 0) return alert("Lütfen geçerli bir ml girin!");
-        const duration = window["lastCalDuration_" + m];
-        const coeff = Math.round(duration / ml);
-        db.ref('ayarlar/motor_coeffs').update({ ["m" + (m=='A'?1:m=='B'?2:3) + "_coeff"]: coeff }).then(() => {
-            alert("Motor " + m + " Kalibre Edildi: 1ml = " + coeff + "ms");
-        });
-    }
+    function runAction(islem_adi, value, btnId) { gonderIslem(islem_adi, value, btnId); }
+    function runDozaj(islem_adi, inputId, btnId) { gonderIslem(islem_adi, document.getElementById(inputId).value, btnId); }
 
     function acAdminPaneli() {
-        const pin = prompt("Admin Giriş PIN Kodunu Giriniz:");
-        if (pin === "1234") { // Burayı istediğiniz bir şifre yapabilirsiniz
-            document.getElementById('admin-panel').style.display = 'block';
-            document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
-        } else {
-            alert("Hatalı PIN!");
-        }
+        const pin = prompt("Admin PIN:");
+        if (pin === "1234") { document.getElementById('admin-panel').style.display = 'block'; }
     }
 
-    function kapatAdminPaneli() {
-        document.getElementById('admin-panel').style.display = 'none';
-    }
+    function kapatAdminPaneli() { document.getElementById('admin-panel').style.display = 'none'; }
 
-    function kaydetTumAyarlar() {
-        if(!confirm("Kritik sistem ayarları değiştirilecek. Emin misiniz?")) return;
-        
-        const settings = {
-            su_tanki: {
-                max_mesafe: parseInt(document.getElementById('cal_max').value),
-                min_mesafe: parseInt(document.getElementById('cal_min').value)
-            },
-            limitler: {
-                ph: { min: parseFloat(document.getElementById('lim_ph_min').value), max: parseFloat(document.getElementById('lim_ph_max').value) },
-                tds: { min: parseInt(document.getElementById('lim_tds_min').value), max: parseInt(document.getElementById('lim_tds_max').value) },
-                temp: { min: parseInt(document.getElementById('lim_temp_min').value), max: parseInt(document.getElementById('lim_temp_max').value) },
-                nem: { min: parseInt(document.getElementById('lim_nem_min').value), max: parseInt(document.getElementById('lim_nem_max').value) }
-            }
-        };
-
-        db.ref('ayarlar').update(settings).then(() => {
-            alert("Tüm ayarlar kaydedildi ve sisteme gönderildi.");
-        });
-    }
-
-    // FIREBASE GERÇEK ZAMANLI DİNLEME (Sadece giriş yapıldıktan sonra çalışır)
     function baslatUygulama() {
-        // AYARLARI BİR KEZ ÇEK (Açılışta kutuları doldurmak için)
-        db.ref('ayarlar').once('value', s => {
-            const settings = s.val();
-            if(!settings) return;
-            if(settings.su_tanki) {
-                document.getElementById('cal_max').value = settings.su_tanki.max_mesafe;
-                document.getElementById('cal_min').value = settings.su_tanki.min_mesafe;
-            }
-            if(settings.limitler) {
-                const lim = settings.limitler;
-                const ids = ['lim_ph_min', 'lim_ph_max', 'lim_tds_min', 'lim_tds_max', 'lim_temp_min', 'lim_temp_max', 'lim_nem_min', 'lim_nem_max'];
-                ids.forEach(id => {
-                    const el = document.getElementById(id);
-                    const [key, sub] = id.split('_').slice(1);
-                    if (lim[key]) el.value = lim[key][sub];
-                });
-            }
-        });
-
         db.ref().on('value', s => {
             const data = s.val();
-            if(!data) return;
-
-        // 1. SENSÖR VERİLERİ (Eski UI Yerleşimi)
-        // 1. SENSÖR VERİLERİ
-        try {
-            if(data.sensorlar) {
-                // --- FONKSİYON: Değer Arıza Kontrolü ---
-                const valCheck = (id, val, unit = "") => {
-                    const el = document.getElementById(id);
-                    if (!el) return;
-                    if (val === -999) {
-                        el.innerText = "ARIZA";
-                        el.style.color = "red";
-                    } else {
-                        el.innerText = (val !== undefined) ? val + unit : "--";
-                        el.style.color = "white";
-                    }
-                };
-
-                // Su Seviyesi Özel (Yüzde Hesabı İçin)
-                let su_y = data.sensorlar.su_seviyesi_yuzde;
-                let su_c = data.sensorlar.su_seviyesi_cm;
-                if (su_y === -999 || su_c === -999) {
-                    document.getElementById('v_su').innerText = "SENSÖR ARIZASI";
-                    document.getElementById('v_su').style.color = "red";
-                } else {
-                    let y = su_y > 100 ? 100 : (su_y < 0 ? 0 : su_y);
-                    document.getElementById('v_su').innerText = "%" + y + " (" + su_c + " cm)";
-                    document.getElementById('v_su').style.color = "var(--accent)";
-                }
-
-                // İç Ortam
-                valCheck('v_is', data.sensorlar.ic_sicaklik, " °C");
-                valCheck('v_in', data.sensorlar.ic_nem, " %");
-                valCheck('v_ip', data.sensorlar.ic_basinc, " hPa");
-                valCheck('v_ss', data.sensorlar.su_sicakligi, " °C");
-                valCheck('v_tds', data.sensorlar.tds_degeri, " ppm");
-                valCheck('v_ph', data.sensorlar.ph_degeri, "");
-
-                // Dış Ortam
-                valCheck('v_ds', data.sensorlar.dis_sicaklik, " °C");
-                valCheck('v_dn', data.sensorlar.dis_nem, " %");
-                valCheck('v_db', data.sensorlar.dis_basinc, " hPa");
-
-                document.getElementById('v_yagmur').innerText = data.sensorlar.yagmur_durumu == 0 ? "YAĞIYOR" : "YOK";
-                document.getElementById('v_saat').innerText = data.sensorlar.son_guncelleme || "--";
-            }
-
-            // Limit Kontrolü ve Görsel Uyarılar
-            if(data.ayarlar && data.ayarlar.limitler) {
-                const lim = data.ayarlar.limitler;
-                if(data.sensorlar && data.sensorlar.tds_degeri !== undefined) {
-                    const tds = data.sensorlar.tds_degeri;
-                    const tdsEl = document.getElementById('v_tds');
-                    if (tds < lim.tds.min || tds > lim.tds.max) tdsEl.classList.add('alert-text'); else tdsEl.classList.remove('alert-text');
-                }
-                if(data.sensorler && data.sensorler.canli && data.sensorler.canli.ic_ortam) {
-                    const t = data.sensorler.canli.ic_ortam.sicaklik;
-                    const n = data.sensorler.canli.ic_ortam.nem;
-                    const tEl = document.getElementById('v_is');
-                    const nEl = document.getElementById('v_in');
-                    if (t < lim.temp.min || t > lim.temp.max) tEl.classList.add('alert-text'); else tEl.classList.remove('alert-text');
-                    if (n < lim.nem.min || n > lim.nem.max) nEl.classList.add('alert-text'); else nEl.classList.remove('alert-text');
-                }
-            }
-        } catch(e) { console.log("Sensor okuma hatasi:", e); }
-
-        // 2. CAM DURUMU
-        const camDurum = data.durumlar ? data.durumlar.gercek_cam : 1;
-        const stCam = document.getElementById('st_cam');
-        stCam.innerText = camDurum == 0 ? "AÇIK" : "KAPALI";
-        stCam.className = "status-tag " + (camDurum == 0 ? "tag-on" : "tag-off");
-
-        // 3. POMPA DURUMU
-        const pompaDurum = data.durumlar ? data.durumlar.gercek_pompa : 0;
-        const stPompa = document.getElementById('st_pompa');
-        stPompa.innerText = pompaDurum == 1 ? "ON" : "OFF";
-        stPompa.className = "status-tag " + (pompaDurum == 1 ? "tag-on" : "tag-off");
-
-        // 4. SİSTEM DURUMU, HEARTBEAT VE YÜKLENME (SPINNER) KONTROLLERİ
-        if (data.sistem_durumu) {
-            // Heartbeat: 30 saniyeden eskiyse offline
-            const now = new Date().getTime();
-            const lastSeen = data.sistem_durumu.son_gorulme || 0;
-            const diff = now - lastSeen;
-            const sysStatus = document.getElementById('sys-status');
-            
-            if (diff < 30000) {
-                sysStatus.innerText = "SİSTEM ÇEVRİMİÇİ";
-                sysStatus.className = "status-tag tag-on";
-            } else {
-                sysStatus.innerText = "SİSTEM ÇEVRİMDIŞI";
-                sysStatus.className = "status-tag tag-off";
-            }
-
-            // State Machine: islem_durumu OK veya ERR ise butondaki spinner'ı kaldır
-            if (data.sistem_durumu.islem_durumu === "OK" || data.sistem_durumu.islem_durumu === "ERR") {
-                const aktif = data.sistem_durumu.aktif_islem;
-                if (aktif === "CAM") { document.getElementById('btn_cam_ac').classList.remove('loading'); document.getElementById('btn_cam_kapat').classList.remove('loading'); }
-                if (aktif === "POMPA") { document.getElementById('btn_p_ac').classList.remove('loading'); document.getElementById('btn_p_kap').classList.remove('loading'); }
-                if (aktif === "DOZAJ_A") document.getElementById('btn_a').classList.remove('loading');
-                if (aktif === "DOZAJ_B") document.getElementById('btn_b').classList.remove('loading');
-                if (aktif === "DOZAJ_C") document.getElementById('btn_c').classList.remove('loading');
-            }
-
-            // Gelişmiş Hata Kontrolü (Error Handling)
             if (data.sistem_durumu.son_hata && data.sistem_durumu.son_hata.startsWith("HATA:")) {
                 const hataKodu = data.sistem_durumu.son_hata;
                 let mesaj = "Bilinmeyen Bir Hata Oluştu.";
