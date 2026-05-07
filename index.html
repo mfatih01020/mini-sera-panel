@@ -144,17 +144,31 @@
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
             <div class="control-row">
-                <span style="font-size: 0.8rem; color: var(--accent);"><i class="fas fa-wind"></i> HAVALANDIRMA (CAM)</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size: 0.8rem; color: var(--accent);"><i class="fas fa-wind"></i> HAVALANDIRMA (CAM)</span>
+                    <span id="st_cam" class="status-tag tag-off">--</span>
+                </div>
                 <div class="btn-group">
-                    <button id="btn_cam_ac" class="btn btn-green" onclick="runAction('CAM', 0, 'btn_cam_ac')">AÇ</button>
-                    <button id="btn_cam_kapat" class="btn btn-red" onclick="runAction('CAM', 1, 'btn_cam_kapat')">KAPAT</button>
+                    <button id="btn_cam_ac" class="btn btn-green" onclick="runAction('CAM', 0, 'btn_cam_ac')">
+                        <div class="spinner"></div><span class="btn-text">AÇ</span>
+                    </button>
+                    <button id="btn_cam_kapat" class="btn btn-red" onclick="runAction('CAM', 1, 'btn_cam_kapat')">
+                        <div class="spinner"></div><span class="btn-text">KAPAT</span>
+                    </button>
                 </div>
             </div>
             <div class="control-row">
-                <span style="font-size: 0.8rem; color: var(--accent);"><i class="fas fa-faucet"></i> ANA SU POMPASI</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size: 0.8rem; color: var(--accent);"><i class="fas fa-faucet"></i> ANA SU POMPASI</span>
+                    <span id="st_pompa" class="status-tag tag-off">--</span>
+                </div>
                 <div class="btn-group">
-                    <button id="btn_pompa_ac" class="btn btn-green" onclick="runAction('POMPA', 1, 'btn_pompa_ac')">AÇ</button>
-                    <button id="btn_pompa_kapat" class="btn btn-red" onclick="runAction('POMPA', 0, 'btn_pompa_kapat')">KAPAT</button>
+                    <button id="btn_pompa_ac" class="btn btn-green" onclick="runAction('POMPA', 1, 'btn_pompa_ac')">
+                        <div class="spinner"></div><span class="btn-text">AÇ</span>
+                    </button>
+                    <button id="btn_pompa_kapat" class="btn btn-red" onclick="runAction('POMPA', 0, 'btn_pompa_kapat')">
+                        <div class="spinner"></div><span class="btn-text">KAPAT</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -167,7 +181,9 @@
                     <input type="number" id="val_a" value="10" style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #444; color:white; text-align:center;">
                     <span style="font-size:0.7rem;">ml</span>
                 </div>
-                <button id="btn_a" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_A', 'val_a', 'btn_a')">GÖNDER</button>
+                <button id="btn_a" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_A', 'val_a', 'btn_a')">
+                    <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+                </button>
             </div>
             <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
                 <p style="font-size:0.7rem; margin-bottom:5px;">DOZAJ B (TDS)</p>
@@ -175,7 +191,9 @@
                     <input type="number" id="val_b" value="10" style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #444; color:white; text-align:center;">
                     <span style="font-size:0.7rem;">ml</span>
                 </div>
-                <button id="btn_b" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_B', 'val_b', 'btn_b')">GÖNDER</button>
+                <button id="btn_b" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_B', 'val_b', 'btn_b')">
+                    <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+                </button>
             </div>
             <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px; text-align:center;">
                 <p style="font-size:0.7rem; margin-bottom:5px;">DOZAJ C (GÜBRE)</p>
@@ -183,7 +201,9 @@
                     <input type="number" id="val_c" value="10" style="width:50px; background:rgba(0,0,0,0.3); border:1px solid #444; color:white; text-align:center;">
                     <span style="font-size:0.7rem;">ml</span>
                 </div>
-                <button id="btn_c" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_C', 'val_c', 'btn_c')">GÖNDER</button>
+                <button id="btn_c" class="btn btn-blue" style="width:100%; font-size:0.7rem;" onclick="runDozaj('DOZAJ_C', 'val_c', 'btn_c')">
+                    <div class="spinner"></div><span class="btn-text">GÖNDER</span>
+                </button>
             </div>
         </div>
     </div>
@@ -290,13 +310,13 @@
 
     function runAction(islem_adi, value, btnId) { 
         console.log("Button clicked:", islem_adi);
-        // alert(islem_adi + " komutu gonderiliyor..."); 
+        alert(islem_adi + " komutu tetiklendi! Gonderiliyor..."); 
         gonderIslem(islem_adi, value, btnId); 
     }
     function runDozaj(islem_adi, inputId, btnId) { 
         const val = document.getElementById(inputId).value;
         console.log("Dozaj clicked:", islem_adi, val);
-        // alert(islem_adi + " (" + val + " ml) gonderiliyor...");
+        alert(islem_adi + " (" + val + " ml) komutu tetiklendi! Gonderiliyor...");
         gonderIslem(islem_adi, val, btnId); 
     }
 
@@ -361,41 +381,45 @@
                 for (let el of timeEls) { el.innerText = curTime; }
             }
 
-            // 2. KONTROL GERİ BİLDİRİMLERİ (Spinner Temizliği)
+            // 2. CİHAZ DURUMLARI (Gerçek Zamanlı)
+            if (data.durumlar) {
+                const cam = data.durumlar.gercek_cam; // 0: Açık, 1: Kapalı
+                const stCam = document.getElementById('st_cam');
+                if (stCam) {
+                    stCam.innerText = cam == 0 ? "AÇIK" : "KAPALI";
+                    stCam.className = "status-tag " + (cam == 0 ? "tag-on" : "tag-off");
+                }
+
+                const pompa = data.durumlar.gercek_pompa; // 0: Kapalı, 1: Açık
+                const stPompa = document.getElementById('st_pompa');
+                if (stPompa) {
+                    stPompa.innerText = pompa == 1 ? "AÇIK" : "KAPALI";
+                    stPompa.className = "status-tag " + (pompa == 1 ? "tag-on" : "tag-off");
+                }
+            }
+
+            // 3. KONTROL GERİ BİLDİRİMLERİ (Spinner Temizliği)
             if (data.sistem_durumu) {
-                // Heartbeat
                 const lastSeen = data.sistem_durumu.son_gorulme || 0;
                 const diff = Date.now() - lastSeen;
                 const sysStatus = document.getElementById('sys-status');
                 if (sysStatus) {
-                    if (diff < 30000) {
-                        sysStatus.innerText = "SİSTEM ÇEVRİMİÇİ";
-                        sysStatus.className = "status-tag tag-on";
-                    } else {
-                        sysStatus.innerText = "SİSTEM ÇEVRİMDIŞI";
-                        sysStatus.className = "status-tag tag-off";
-                    }
+                    if (diff < 30000) { sysStatus.innerText = "SİSTEM ÇEVRİMİÇİ"; sysStatus.className = "status-tag tag-on"; }
+                    else { sysStatus.innerText = "SİSTEM ÇEVRİMDIŞI"; sysStatus.className = "status-tag tag-off"; }
                 }
 
-                // Spinner kaldır
                 if (data.sistem_durumu.islem_durumu === "OK" || data.sistem_durumu.islem_durumu === "ERR") {
                     const aktif = data.sistem_durumu.aktif_islem;
                     const btnIds = {
                         'CAM': ['btn_cam_ac', 'btn_cam_kapat'],
                         'POMPA': ['btn_pompa_ac', 'btn_pompa_kapat'],
-                        'DOZAJ_A': ['btn_a'],
-                        'DOZAJ_B': ['btn_b'],
-                        'DOZAJ_C': ['btn_c']
+                        'DOZAJ_A': ['btn_a'], 'DOZAJ_B': ['btn_b'], 'DOZAJ_C': ['btn_c']
                     };
                     if (btnIds[aktif]) {
-                        btnIds[aktif].forEach(id => {
-                            const b = document.getElementById(id);
-                            if(b) b.classList.remove('loading');
-                        });
+                        btnIds[aktif].forEach(id => { const b = document.getElementById(id); if(b) b.classList.remove('loading'); });
                     }
                 }
 
-                // Hata Gösterimi
                 if (data.sistem_durumu.son_hata && data.sistem_durumu.son_hata.startsWith("HATA:")) {
                     alert("SİSTEM UYARISI!\n\n" + data.sistem_durumu.son_hata);
                     db.ref('sistem_durumu/son_hata').set(""); 
