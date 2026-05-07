@@ -242,8 +242,10 @@
     const auth = firebase.auth();
 
     function checkLogin() {
-        const pwd = document.getElementById('login-pwd').value;
-        const email = document.getElementById('login-email').value || "admin@sera.com"; // Fallback email
+        const pwdInput = document.getElementById('login-pwd');
+        if (!pwdInput) return;
+        const pwd = pwdInput.value;
+        const email = "admin@sera.com"; // Sabit email, UI'da istenmiyor
 
         if (pwd === "1234") { // ACİL GİRİŞ KODU
             document.getElementById('login-overlay').style.display = 'none';
