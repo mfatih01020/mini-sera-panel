@@ -572,6 +572,18 @@
                         </div>
                     </div>
 
+                    <!-- pH SENSÖR KALİBRASYONU -->
+                    <div class="cal-group" style="border: 1px solid rgba(255,255,255,0.1); padding:15px; border-radius:10px;">
+                        <p style="font-weight: bold; color: var(--accent); margin-bottom: 15px;"><i class="fas fa-vial"></i> pH Sensör Kalibrasyonu (4.0 & 7.0)</p>
+                        <div class="cal-box" style="background: rgba(255,255,255,0.05); padding:10px; border-radius:5px;">
+                            <p style="font-size:0.7rem; margin-bottom:10px; color:#888;">Sensörü sıvıya daldırıp 1 dakika bekledikten sonra butona basınız.</p>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                <button id="btn_ph7" class="btn btn-green" style="font-size:0.7rem;" onclick="runAction('CAL_PH', 7, 'btn_ph7')">7.0 KALİBRE ET</button>
+                                <button id="btn_ph4" class="btn btn-red" style="font-size:0.7rem;" onclick="runAction('CAL_PH', 4, 'btn_ph4')">4.0 KALİBRE ET</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- SENSÖR OFFSET AYARLARI -->
                     <div class="cal-group"
                         style="border: 1px solid rgba(255,255,255,0.1); padding:15px; border-radius:10px;">
