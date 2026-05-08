@@ -1173,7 +1173,7 @@
                     });
             }
 
-            function cizGrafik(labels, dataPoints, labelName, limitKey = null) {
+            function cizGrafik(labels, dataPoints, labelName, lKey = null) {
                 const ctx = document.getElementById('sensorChart').getContext('2d');
 
                 // Renklendirme mantığı (Noktalar için)
@@ -1182,9 +1182,9 @@
 
                 dataPoints.forEach(val => {
                     let isDanger = false;
-                    if (limitKey && window.idealLimits) {
-                        const min = window.idealLimits[limitKey + '_min'];
-                        const max = window.idealLimits[limitKey + '_max'];
+                    if (lKey && window.idealLimits) {
+                        const min = window.idealLimits[lKey + '_min'];
+                        const max = window.idealLimits[lKey + '_max'];
                         if ((min !== undefined && val < min) || (max !== undefined && val > max)) {
                             isDanger = true;
                         }
@@ -1204,9 +1204,8 @@
                 }
 
                 // İdeal Limitleri Al (Boyama için)
-                const limitKey = sensorPath.split('_')[0]; // örn: 'ph', 'tds', 'ic'
-                const minVal = window.idealLimits ? window.idealLimits[limitKey + '_min'] : null;
-                const maxVal = window.idealLimits ? window.idealLimits[limitKey + '_max'] : null;
+                const minVal = (lKey && window.idealLimits) ? window.idealLimits[lKey + '_min'] : null;
+                const maxVal = (lKey && window.idealLimits) ? window.idealLimits[lKey + '_max'] : null;
 
                 const annotations = {};
                 if (minVal !== null) {
