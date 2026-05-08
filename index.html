@@ -126,8 +126,8 @@
             <div class="sensor-item" onclick="grafikGoster('ic_sicaklik', 'Hava Sıcaklığı (°C)', 'tmp')"><span class="sensor-label">HAVA SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('ic_nem', 'Hava Nemi (%)', 'hum')"><span class="sensor-label">HAVA NEM</span><span id="v_in" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('ic_basinc', 'Hava Basıncı (hPa)')"><span class="sensor-label">HAVA BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
-            <div class="sensor-item" onclick="grafikGoster('su_seviyesi_yuzde', 'Su Seviyesi Yüzdesi (%)')"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
-            <div class="sensor-item" onclick="grafikGoster('su_sicakligi', 'Su Sıcaklığı (°C)')"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('su_seviyesi_yuzde', 'Su Seviyesi Yüzdesi (%)', 'su')"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('su_sicakligi', 'Su Sıcaklığı (°C)', 'st')"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('tds_degeri', 'TDS / Gübre (ppm)', 'tds')"><span class="sensor-label">TDS (GÜBRE)</span><span id="v_tds" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('ph_degeri', 'pH Değeri', 'ph')"><span class="sensor-label">PH DEĞERİ</span><span id="v_ph" class="sensor-value">--</span></div>
         </div>
@@ -272,6 +272,8 @@
                 <div class="limit-row"><span class="limit-label">İç Nem (%):</span><input type="number" id="ideal_hum_min" step="1" value="40" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_hum_max" step="1" value="80" style="width:40px;"></div>
                 <div class="limit-row"><span class="limit-label">Toprak/Su pH:</span><input type="number" id="ideal_ph_min" step="0.1" value="5.5" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_ph_max" step="0.1" value="6.5" style="width:40px;"></div>
                 <div class="limit-row"><span class="limit-label">Gübre/TDS (PPM):</span><input type="number" id="ideal_tds_min" step="10" value="500" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_tds_max" step="10" value="1200" style="width:40px;"></div>
+                <div class="limit-row"><span class="limit-label">Su Sıcaklığı (°C):</span><input type="number" id="ideal_st_min" step="1" value="18" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_st_max" step="1" value="25" style="width:40px;"></div>
+                <div class="limit-row"><span class="limit-label">Kritik Su Seviyesi (%):</span><input type="number" id="ideal_su_min" step="1" value="20" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_su_max" step="1" value="100" style="width:40px;"></div>
                 <p style="font-size: 0.7rem; color: #8b949e; margin-top: 10px; line-height: 1.3;">
                     <i>* Canlı veriler bu değerler dışına çıkarsa sistem anında kırmızı renkte uyarı verecektir.</i>
                 </p>
@@ -448,7 +450,11 @@
                 ph_min: parseFloat(document.getElementById('ideal_ph_min').value || 5.5),
                 ph_max: parseFloat(document.getElementById('ideal_ph_max').value || 6.5),
                 tds_min: parseInt(document.getElementById('ideal_tds_min').value || 500),
-                tds_max: parseInt(document.getElementById('ideal_tds_max').value || 1200)
+                tds_max: parseInt(document.getElementById('ideal_tds_max').value || 1200),
+                st_min: parseFloat(document.getElementById('ideal_st_min').value || 18),
+                st_max: parseFloat(document.getElementById('ideal_st_max').value || 25),
+                su_min: parseFloat(document.getElementById('ideal_su_min').value || 20),
+                su_max: parseFloat(document.getElementById('ideal_su_max').value || 100)
             },
             offsets: {
                 it: parseFloat(document.getElementById('off_is').value || 0),
@@ -530,6 +536,8 @@
                         setV('ideal_hum_min', d.bitki_limitleri.hum_min); setV('ideal_hum_max', d.bitki_limitleri.hum_max);
                         setV('ideal_ph_min', d.bitki_limitleri.ph_min); setV('ideal_ph_max', d.bitki_limitleri.ph_max);
                         setV('ideal_tds_min', d.bitki_limitleri.tds_min); setV('ideal_tds_max', d.bitki_limitleri.tds_max);
+                        setV('ideal_st_min', d.bitki_limitleri.st_min); setV('ideal_st_max', d.bitki_limitleri.st_max);
+                        setV('ideal_su_min', d.bitki_limitleri.su_min); setV('ideal_su_max', d.bitki_limitleri.su_max);
                     }
                     if (d.offsets) {
                         setV('off_is', d.offsets.it); setV('off_in', d.offsets.in);
@@ -580,13 +588,26 @@
                 } else {
                     let y = su_y > 100 ? 100 : (su_y < 0 ? 0 : su_y);
                     document.getElementById('v_su').innerText = "%" + y + " (" + su_c + " cm)";
-                    document.getElementById('v_su').style.color = "white";
+                    
+                    const elSu = document.getElementById('v_su');
+                    elSu.classList.remove('danger-text');
+                    if (elSu.parentElement) elSu.parentElement.classList.remove('pulse-alert');
+                    elSu.style.color = "";
+
+                    if (window.idealLimits) {
+                        const min = window.idealLimits['su_min'];
+                        const max = window.idealLimits['su_max'];
+                        if ((min !== undefined && y < min) || (max !== undefined && y > max)) {
+                            if (elSu.parentElement) elSu.parentElement.classList.add('pulse-alert');
+                            elSu.classList.add('danger-text');
+                        }
+                    }
                 }
 
                 valCheck('v_is', data.sensorlar.ic_sicaklik, " °C", "tmp");
                 valCheck('v_in', data.sensorlar.ic_nem, " %", "hum");
                 valCheck('v_ip', data.sensorlar.ic_basinc, " hPa");
-                valCheck('v_ss', data.sensorlar.su_sicakligi, " °C");
+                valCheck('v_ss', data.sensorlar.su_sicakligi, " °C", "st");
                 valCheck('v_tds', data.sensorlar.tds_degeri, " ppm", "tds");
                 valCheck('v_ph', data.sensorlar.ph_degeri, "", "ph");
                 valCheck('v_ds', data.sensorlar.dis_sicaklik, " °C");
