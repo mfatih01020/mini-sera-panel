@@ -330,7 +330,10 @@
         <!-- LOG TERMİNALİ (Admin İçinde) -->
         <div style="background: #000; border: 1px solid #333; margin-top: 20px; border-radius: 10px; padding: 15px;">
             <div style="border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="color: #3fb950; font-family: monospace; font-weight:bold;"><i class="fas fa-terminal"></i> SİSTEM TERMİNALİ / GECE LOGLARI</span>
+                <span style="color: #3fb950; font-family: monospace; font-weight:bold;">
+                    <i class="fas fa-terminal"></i> SİSTEM TERMİNALİ / GECE LOGLARI 
+                    <span id="v_ram" style="font-size:0.7rem; color:#8b949e; margin-left:10px;"></span>
+                </span>
                 <button class="btn btn-red" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="temizleLoglar()">LOGLARI SİL</button>
             </div>
             <div id="log-terminal" style="height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #ccc; line-height: 1.4; padding: 5px;">
@@ -692,6 +695,17 @@
                 if (sysStatus) {
                     if (diff < 30000) { sysStatus.innerText = "SİSTEM ÇEVRİMİÇİ"; sysStatus.className = "status-tag tag-on"; }
                     else { sysStatus.innerText = "SİSTEM ÇEVRİMDIŞI"; sysStatus.className = "status-tag tag-off"; }
+                }
+
+                if (data.sistem_durumu.bos_ram) {
+                    const ramKb = (data.sistem_durumu.bos_ram / 1024).toFixed(1);
+                    const uptime = data.sistem_durumu.uptime_sn || 0;
+                    const hours = Math.floor(uptime / 3600);
+                    const mins = Math.floor((uptime % 3600) / 60);
+                    const signal = data.sistem_durumu.wifi_sinyal || 0;
+                    
+                    document.getElementById('v_ram').innerHTML = 
+                        `(RAM: ${ramKb}KB | UPTIME: ${hours}sa ${mins}dk | SİNYAL: ${signal}dBm)`;
                 }
 
                 if (data.sistem_durumu.islem_durumu === "OK" || data.sistem_durumu.islem_durumu === "ERR") {
