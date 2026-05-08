@@ -334,7 +334,11 @@
                     <i class="fas fa-terminal"></i> SİSTEM TERMİNALİ / GECE LOGLARI 
                     <span id="v_ram" style="font-size:0.7rem; color:#8b949e; margin-left:10px;"></span>
                 </span>
-                <button class="btn btn-red" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="temizleLoglar()">LOGLARI SİL</button>
+                </span>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn btn-blue" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="grafikSaglikGoster()"><i class="fas fa-chart-area"></i> ANALİZ ET</button>
+                    <button class="btn btn-red" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="temizleLoglar()">LOGLARI SİL</button>
+                </div>
             </div>
             <div id="log-terminal" style="height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #ccc; line-height: 1.4; padding: 5px;">
                 <div style="color: #666;">--- Sistem Logları Dinleniyor ---</div>
@@ -838,6 +842,83 @@
                     y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
                 }
             }
+        });
+    }
+
+    function grafikSaglikGoster() {
+        document.getElementById('chartModal').style.display = 'flex';
+        document.getElementById('chartTitle').innerText = "Sistem Sağlık Analizi (RAM & WiFi)";
+        document.getElementById('chartLoading').style.display = 'block';
+        document.getElementById('sensorChart').style.display = 'none';
+
+        const limit = parseInt(document.getElementById('cfg_grafik_limit').value || 100);
+        db.ref('gecmis/sensorlar').orderByKey().limitToLast(limit).once('value')
+        .then((snapshot) => {
+            document.getElementById('chartLoading').style.display = 'none';
+            document.getElementById('sensorChart').style.display = 'block';
+
+            const veriler = snapshot.val();
+            const labels = [];
+            const ramData = [];
+            const wifiData = [];
+
+            if (veriler) {
+                Object.keys(veriler).forEach(key => {
+                    const kayit = veriler[key];
+                    if (kayit && kayit.son_guncelleme) {
+                        labels.push(kayit.son_guncelleme);
+                        ramData.push(kayit.bos_ram || 0);
+                        wifiData.push(kayit.wifi_sinyal || 0);
+                    }
+                });
+            }
+
+            if (sensorChartInstance) sensorChartInstance.destroy();
+            const ctx = document.getElementById('sensorChart').getContext('2d');
+            sensorChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Boş RAM (KB)',
+                            data: ramData,
+                            borderColor: '#3fb950',
+                            backgroundColor: 'rgba(63, 185, 80, 0.1)',
+                            yAxisID: 'y_ram',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'WiFi Sinyal (dBm)',
+                            data: wifiData,
+                            borderColor: '#f0883e',
+                            backgroundColor: 'rgba(240, 136, 62, 0.1)',
+                            yAxisID: 'y_wifi',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y_ram: { 
+                            type: 'linear', position: 'left',
+                            title: { display: true, text: 'RAM (KB)', color: '#3fb950' },
+                            ticks: { color: '#3fb950' }, grid: { color: 'rgba(63, 185, 80, 0.1)' }
+                        },
+                        y_wifi: { 
+                            type: 'linear', position: 'right',
+                            title: { display: true, text: 'Sinyal (dBm)', color: '#f0883e' },
+                            ticks: { color: '#f0883e' }, grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: { legend: { labels: { color: '#c9d1d9' } } }
+                }
+            });
         });
     }
 
