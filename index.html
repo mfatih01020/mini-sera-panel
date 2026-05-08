@@ -49,6 +49,10 @@
 
         input[type="number"] { width: 60px; background: #0b0e14; border: 1px solid var(--border); color: white; border-radius: 5px; padding: 5px; text-align: center; }
 
+        .danger-text { color: #ff7b72 !important; font-weight: 900 !important; }
+        @keyframes pulse-alert { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: #ff7b72; } 100% { transform: scale(1); } }
+        .pulse-alert { animation: pulse-alert 1.5s infinite; }
+
         /* GİRİŞ EKRANI STİLLERİ */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -119,13 +123,13 @@
             <span style="font-size: 0.6rem; opacity: 0.5;">Güncelleme: <span class="v_time">--:--</span></span>
         </div>
         <div class="sensor-group">
-            <div class="sensor-item" onclick="grafikGoster('ic_sicaklik', 'Hava Sıcaklığı (°C)')"><span class="sensor-label">HAVA SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
-            <div class="sensor-item" onclick="grafikGoster('ic_nem', 'Hava Nemi (%)')"><span class="sensor-label">HAVA NEM</span><span id="v_in" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ic_sicaklik', 'Hava Sıcaklığı (°C)', 'tmp')"><span class="sensor-label">HAVA SICAKLIK</span><span id="v_is" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ic_nem', 'Hava Nemi (%)', 'hum')"><span class="sensor-label">HAVA NEM</span><span id="v_in" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('ic_basinc', 'Hava Basıncı (hPa)')"><span class="sensor-label">HAVA BASINÇ</span><span id="v_ip" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('su_seviyesi_yuzde', 'Su Seviyesi Yüzdesi (%)')"><span class="sensor-label">SU SEVİYESİ</span><span id="v_su" class="sensor-value">--</span></div>
             <div class="sensor-item" onclick="grafikGoster('su_sicakligi', 'Su Sıcaklığı (°C)')"><span class="sensor-label">SU SICAKLIK</span><span id="v_ss" class="sensor-value">--</span></div>
-            <div class="sensor-item" onclick="grafikGoster('tds_degeri', 'TDS / Gübre (ppm)')"><span class="sensor-label">TDS (GÜBRE)</span><span id="v_tds" class="sensor-value">--</span></div>
-            <div class="sensor-item" onclick="grafikGoster('ph_degeri', 'pH Değeri')"><span class="sensor-label">PH DEĞERİ</span><span id="v_ph" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('tds_degeri', 'TDS / Gübre (ppm)', 'tds')"><span class="sensor-label">TDS (GÜBRE)</span><span id="v_tds" class="sensor-value">--</span></div>
+            <div class="sensor-item" onclick="grafikGoster('ph_degeri', 'pH Değeri', 'ph')"><span class="sensor-label">PH DEĞERİ</span><span id="v_ph" class="sensor-value">--</span></div>
         </div>
     </div>
 
@@ -259,6 +263,18 @@
                 <div class="limit-row"><span class="limit-label">Dış Nem:</span><input type="number" id="off_dn" step="0.1" value="0"></div>
                 <div class="limit-row"><span class="limit-label">pH Değeri:</span><input type="number" id="off_ph" step="0.01" value="0"></div>
                 <div class="limit-row"><span class="limit-label">TDS (PPM):</span><input type="number" id="off_tds" step="1" value="0"></div>
+            </div>
+
+            <!-- BİTKİ İHTİYAÇLARI (İDEAL LİMİTLER) -->
+            <div class="cal-group" style="border: 1px solid rgba(255,255,255,0.1); padding:15px; border-radius:10px;">
+                <p style="font-weight: bold; color: var(--green); margin-bottom: 15px;"><i class="fas fa-leaf"></i> Bitki İhtiyaçları (İdeal Sınırlar)</p>
+                <div class="limit-row"><span class="limit-label">İç Sıcaklık (°C):</span><input type="number" id="ideal_tmp_min" step="1" value="18" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_tmp_max" step="1" value="28" style="width:40px;"></div>
+                <div class="limit-row"><span class="limit-label">İç Nem (%):</span><input type="number" id="ideal_hum_min" step="1" value="40" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_hum_max" step="1" value="80" style="width:40px;"></div>
+                <div class="limit-row"><span class="limit-label">Toprak/Su pH:</span><input type="number" id="ideal_ph_min" step="0.1" value="5.5" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_ph_max" step="0.1" value="6.5" style="width:40px;"></div>
+                <div class="limit-row"><span class="limit-label">Gübre/TDS (PPM):</span><input type="number" id="ideal_tds_min" step="10" value="500" style="width:40px;"><span style="color:var(--border)">-</span><input type="number" id="ideal_tds_max" step="10" value="1200" style="width:40px;"></div>
+                <p style="font-size: 0.7rem; color: #8b949e; margin-top: 10px; line-height: 1.3;">
+                    <i>* Canlı veriler bu değerler dışına çıkarsa sistem anında kırmızı renkte uyarı verecektir.</i>
+                </p>
             </div>
 
             <!-- VERİ TOPLAMA VE ÖRNEKLEM AYARLARI -->
@@ -424,6 +440,16 @@
                 orneklem_sn: parseInt(document.getElementById('cfg_orneklem_sn').value || 5),
                 kayit_dk: parseInt(document.getElementById('cfg_kayit_dk').value || 10)
             },
+            bitki_limitleri: {
+                tmp_min: parseFloat(document.getElementById('ideal_tmp_min').value || 18),
+                tmp_max: parseFloat(document.getElementById('ideal_tmp_max').value || 28),
+                hum_min: parseFloat(document.getElementById('ideal_hum_min').value || 40),
+                hum_max: parseFloat(document.getElementById('ideal_hum_max').value || 80),
+                ph_min: parseFloat(document.getElementById('ideal_ph_min').value || 5.5),
+                ph_max: parseFloat(document.getElementById('ideal_ph_max').value || 6.5),
+                tds_min: parseInt(document.getElementById('ideal_tds_min').value || 500),
+                tds_max: parseInt(document.getElementById('ideal_tds_max').value || 1200)
+            },
             offsets: {
                 it: parseFloat(document.getElementById('off_is').value || 0),
                 in: parseFloat(document.getElementById('off_in').value || 0),
@@ -498,6 +524,13 @@
                     const d = data.ayarlar.data;
                     const setV = (id, v) => { const el = document.getElementById(id); if(el && !el.matches(':focus')) el.value = v; };
                     if (d.zamanlama) { setV('cfg_orneklem_sn', d.zamanlama.orneklem_sn); setV('cfg_kayit_dk', d.zamanlama.kayit_dk); }
+                    if (d.bitki_limitleri) {
+                        window.idealLimits = d.bitki_limitleri;
+                        setV('ideal_tmp_min', d.bitki_limitleri.tmp_min); setV('ideal_tmp_max', d.bitki_limitleri.tmp_max);
+                        setV('ideal_hum_min', d.bitki_limitleri.hum_min); setV('ideal_hum_max', d.bitki_limitleri.hum_max);
+                        setV('ideal_ph_min', d.bitki_limitleri.ph_min); setV('ideal_ph_max', d.bitki_limitleri.ph_max);
+                        setV('ideal_tds_min', d.bitki_limitleri.tds_min); setV('ideal_tds_max', d.bitki_limitleri.tds_max);
+                    }
                     if (d.offsets) {
                         setV('off_is', d.offsets.it); setV('off_in', d.offsets.in);
                         setV('off_ds', d.offsets.dt); setV('off_dn', d.offsets.dn);
@@ -510,13 +543,26 @@
 
             // 1. SENSÖR VERİLERİ VE ARIZA KONTROLÜ
             if (data.sensorlar) {
-                const valCheck = (id, val, unit = "") => {
+                const valCheck = (id, val, unit = "", limitKey = null) => {
                     const el = document.getElementById(id);
                     if (!el) return;
+                    
+                    el.classList.remove('danger-text');
+                    if (el.parentElement) el.parentElement.classList.remove('pulse-alert');
+
                     if (val === -999) {
                         el.innerText = "ARIZA"; el.style.color = "red";
                     } else {
-                        el.innerText = (val !== undefined) ? val + unit : "--"; el.style.color = "white";
+                        el.innerText = (val !== undefined) ? val + unit : "--"; el.style.color = ""; // Varsayılan renk CSS'ten gelsin
+                        
+                        if (val !== undefined && limitKey && window.idealLimits) {
+                            const min = window.idealLimits[limitKey + '_min'];
+                            const max = window.idealLimits[limitKey + '_max'];
+                            if ((min !== undefined && val < min) || (max !== undefined && val > max)) {
+                                if (el.parentElement) el.parentElement.classList.add('pulse-alert');
+                                el.classList.add('danger-text');
+                            }
+                        }
                     }
                 };
 
@@ -537,12 +583,12 @@
                     document.getElementById('v_su').style.color = "white";
                 }
 
-                valCheck('v_is', data.sensorlar.ic_sicaklik, " °C");
-                valCheck('v_in', data.sensorlar.ic_nem, " %");
+                valCheck('v_is', data.sensorlar.ic_sicaklik, " °C", "tmp");
+                valCheck('v_in', data.sensorlar.ic_nem, " %", "hum");
                 valCheck('v_ip', data.sensorlar.ic_basinc, " hPa");
                 valCheck('v_ss', data.sensorlar.su_sicakligi, " °C");
-                valCheck('v_tds', data.sensorlar.tds_degeri, " ppm");
-                valCheck('v_ph', data.sensorlar.ph_degeri, "");
+                valCheck('v_tds', data.sensorlar.tds_degeri, " ppm", "tds");
+                valCheck('v_ph', data.sensorlar.ph_degeri, "", "ph");
                 valCheck('v_ds', data.sensorlar.dis_sicaklik, " °C");
                 valCheck('v_dn', data.sensorlar.dis_nem, " %");
                 valCheck('v_db', data.sensorlar.dis_basinc, " hPa");
@@ -611,7 +657,7 @@
     // --- GRAFİK FONKSİYONLARI ---
     let sensorChartInstance = null;
 
-    function grafikGoster(sensorKey, title) {
+    function grafikGoster(sensorKey, title, limitKey = null) {
         // Modalı Aç
         document.getElementById('chartModal').style.display = 'flex';
         document.getElementById('chartTitle').innerText = title + " Geçmiş Grafiği";
@@ -647,16 +693,38 @@
             }
 
             // Grafiği Çiz
-            cizGrafik(labels, dataPoints, title);
+            cizGrafik(labels, dataPoints, title, limitKey);
         })
         .catch(err => {
             document.getElementById('chartLoading').innerText = "Hata: " + err.message;
         });
     }
 
-    function cizGrafik(labels, dataPoints, labelName) {
+    function cizGrafik(labels, dataPoints, labelName, limitKey = null) {
         const ctx = document.getElementById('sensorChart').getContext('2d');
         
+        // Renklendirme mantığı (Noktalar için)
+        const pointColors = [];
+        const pointRadii = [];
+        
+        dataPoints.forEach(val => {
+            let isDanger = false;
+            if (limitKey && window.idealLimits) {
+                const min = window.idealLimits[limitKey + '_min'];
+                const max = window.idealLimits[limitKey + '_max'];
+                if ((min !== undefined && val < min) || (max !== undefined && val > max)) {
+                    isDanger = true;
+                }
+            }
+            if (isDanger) {
+                pointColors.push('#ff7b72'); // Kırmızı uyarı
+                pointRadii.push(4);          // Daha büyük nokta
+            } else {
+                pointColors.push('#58a6ff'); // Standart mavi
+                pointRadii.push(2);          // Standart boyut
+            }
+        });
+
         // Varsa eski grafiği yok et
         if (sensorChartInstance) {
             sensorChartInstance.destroy();
@@ -672,8 +740,8 @@
                     borderColor: '#58a6ff',
                     backgroundColor: 'rgba(88, 166, 255, 0.1)',
                     borderWidth: 2,
-                    pointRadius: 2,
-                    pointBackgroundColor: '#58a6ff',
+                    pointRadius: pointRadii,
+                    pointBackgroundColor: pointColors,
                     fill: true,
                     tension: 0.3 // Yumuşak çizgiler
                 }]
