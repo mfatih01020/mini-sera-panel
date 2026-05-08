@@ -1148,12 +1148,21 @@
                         const dataPoints = [];
 
                         if (veriler) {
-                            // Objeyi diziye çevirip tarihe göre sırala
                             Object.keys(veriler).forEach(key => {
                                 const kayit = veriler[key];
-                                if (kayit && kayit[sensorKey] !== undefined && kayit[sensorKey] !== -999) {
+                                if (kayit) {
                                     labels.push(kayit.son_guncelleme || "--:--");
-                                    dataPoints.push(kayit[sensorKey]);
+                                    let val = kayit[sensorKey];
+                                    
+                                    // Su seviyesi için 0-100 sınırlaması ve Hata Ayıklama
+                                    if (sensorKey === 'su_seviyesi_yuzde') {
+                                        if (val === -999 || val < 0 || val > 100) {
+                                            val = null; // Grafikte boşluk bırakır
+                                        }
+                                    } else {
+                                        if (val === -999) val = null;
+                                    }
+                                    dataPoints.push(val);
                                 }
                             });
                         }
@@ -1166,14 +1175,14 @@
                         }
 
                         // Grafiği Çiz
-                        cizGrafik(labels, dataPoints, title, limitKey);
+                        cizGrafik(labels, dataPoints, title, limitKey, (sensorKey === 'su_seviyesi_yuzde'));
                     })
                     .catch(err => {
                         document.getElementById('chartLoading').innerText = "Hata: " + err.message;
                     });
             }
 
-            function cizGrafik(labels, dataPoints, labelName, lKey = null) {
+            function cizGrafik(labels, dataPoints, labelName, lKey = null, isPercentage = false) {
                 const ctx = document.getElementById('sensorChart').getContext('2d');
 
                 // Renklendirme mantığı (Noktalar için)
@@ -1182,7 +1191,7 @@
 
                 dataPoints.forEach(val => {
                     let isDanger = false;
-                    if (lKey && window.idealLimits) {
+                    if (val !== null && lKey && window.idealLimits) {
                         const min = window.idealLimits[lKey + '_min'];
                         const max = window.idealLimits[lKey + '_max'];
                         if ((min !== undefined && val < min) || (max !== undefined && val > max)) {
@@ -1218,7 +1227,7 @@
                 }
                 if (maxVal !== null) {
                     annotations.highZone = {
-                        type: 'box', yMin: maxVal, yMax: 5000, // Yüksek bir değer
+                        type: 'box', yMin: maxVal, yMax: isPercentage ? 100 : 5000,
                         backgroundColor: 'rgba(255, 0, 0, 0.1)',
                         borderColor: 'rgba(255, 0, 0, 0.2)',
                         borderWidth: 1, label: { enabled: true, content: 'YÜKSEK', position: 'end', color: 'red', font: {size: 10} }
@@ -1226,7 +1235,7 @@
                 }
 
                 try {
-                    // Chart.js 3+ için eklentiyi kaydet (Eğer otomatik kaydedilmediyse)
+                    // Chart.js 3+ için eklentiyi kaydet
                     if (window['chartjs-plugin-annotation']) {
                         Chart.register(window['chartjs-plugin-annotation']);
                     }
@@ -1244,7 +1253,8 @@
                                 pointRadius: pointRadii,
                                 pointBackgroundColor: pointColors,
                                 fill: true,
-                                tension: 0.3
+                                tension: 0.3,
+                                spanGaps: false // Hatalı veride çizgiyi kes
                             }]
                         },
                         options: {
@@ -1256,7 +1266,12 @@
                             },
                             scales: {
                                 x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                                y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                                y: { 
+                                    min: isPercentage ? 0 : undefined,
+                                    max: isPercentage ? 100 : undefined,
+                                    ticks: { color: '#8b949e' }, 
+                                    grid: { color: 'rgba(255,255,255,0.05)' } 
+                                }
                             }
                         }
                     });
