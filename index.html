@@ -8,8 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -1226,35 +1224,44 @@
                     };
                 }
 
-                sensorChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: labelName,
-                            data: dataPoints,
-                            borderColor: '#58a6ff',
-                            backgroundColor: 'rgba(88, 166, 255, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: pointRadii,
-                            pointBackgroundColor: pointColors,
-                            fill: true,
-                            tension: 0.3 // Yumuşak çizgiler
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { labels: { color: '#c9d1d9' } },
-                            annotation: { annotations: annotations }
-                        },
-                        scales: {
-                            x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                        }
+                try {
+                    // Chart.js 3+ için eklentiyi kaydet (Eğer otomatik kaydedilmediyse)
+                    if (window['chartjs-plugin-annotation']) {
+                        Chart.register(window['chartjs-plugin-annotation']);
                     }
-                });
+
+                    sensorChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: labelName,
+                                data: dataPoints,
+                                borderColor: '#58a6ff',
+                                backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: pointRadii,
+                                pointBackgroundColor: pointColors,
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#c9d1d9' } },
+                                annotation: { annotations: annotations }
+                            },
+                            scales: {
+                                x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                                y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error("Grafik cizilemedi:", e);
+                }
             }
 
             function grafikSaglikGoster(isSilent = false) {
@@ -1361,6 +1368,9 @@
             }
 
         </script>
+        <!-- Grafik Kütüphaneleri (En Sonda Yüklenmesi Daha Güvenli) -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
 </body>
 
 </html>
