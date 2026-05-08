@@ -523,19 +523,20 @@
 
     function temizleLoglar() {
         if(confirm("Tüm gece loglarını silmek istediğinize emin misiniz?")) {
-            db.ref('sistem_durumu/loglar').remove();
+            db.ref('logs').remove();
             document.getElementById('log-terminal').innerHTML = '<div style="color: #666;">--- Sistem Logları Dinleniyor ---</div>';
         }
     }
 
     function baslatUygulama() {
         // Logları Dinle (Terminal İçin)
-        db.ref('sistem_durumu/loglar').limitToLast(50).on('child_added', (snapshot) => {
+        db.ref('logs').limitToLast(50).on('child_added', (snapshot) => {
             const data = snapshot.val();
             if (data && data.mesaj) {
                 const term = document.getElementById('log-terminal');
                 const div = document.createElement('div');
-                const timeStr = data.zaman ? new Date(data.zaman).toLocaleTimeString('tr-TR') : '--:--:--';
+                const d = data.zaman ? new Date(data.zaman) : null;
+                const timeStr = (d && !isNaN(d.getTime())) ? d.toLocaleTimeString('tr-TR') : '--:--:--';
                 let color = "#c9d1d9";
                 if(data.mesaj.includes("HATA") || data.mesaj.includes("ÇÖKTÜ") || data.mesaj.includes("YENİDEN BAŞLATILDI")) color = "#ff7b72";
                 if(data.mesaj.includes("✅")) color = "#3fb950";
