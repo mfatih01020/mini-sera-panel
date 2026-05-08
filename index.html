@@ -766,17 +766,16 @@
                     </div>
                 </div>
 
-                <!-- GÜNCELLEME MERKEZİ -->
-                <div style="background: #161b22; border: 1px solid var(--accent); margin-top: 20px; border-radius: 10px; padding: 15px;">
-                    <div style="border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px;">
-                        <span style="color: var(--accent); font-weight:bold;"><i class="fas fa-cloud-upload-alt"></i> SİSTEM GÜNCELLEME (OTA)</span>
+                <!-- SADELEŞTİRİLMİŞ GÜNCELLEME MERKEZİ -->
+                <div style="background: #161b22; border: 1px solid var(--accent); margin-top: 20px; border-radius: 10px; padding: 15px; text-align: center;">
+                    <div style="border-bottom: 1px solid #333; margin-bottom: 15px; padding-bottom: 5px;">
+                        <span style="color: var(--accent); font-weight:bold;"><i class="fas fa-cloud-upload-alt"></i> SİSTEM GÜNCELLEME</span>
                     </div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <button class="btn btn-blue" style="flex:1;" onclick="sistemGuncelle('Mega')"><i class="fas fa-microchip"></i> MEGA GÜNCELLE <span id="mega-up-badge" style="display:none; font-size:0.6rem; background:var(--red); padding:2px 5px; border-radius:5px;">YENİ!</span></button>
-                        <button class="btn btn-green" style="flex:1;" onclick="sistemGuncelle('NodeMCU')"><i class="fas fa-wifi"></i> NODEMCU GÜNCELLE <span id="node-up-badge" style="display:none; font-size:0.6rem; background:var(--red); padding:2px 5px; border-radius:5px;">YENİ!</span></button>
-                    </div>
-                    <p id="version-info" style="font-size:0.65rem; opacity:0.7; margin-top:10px; color: var(--accent);">Mevcut Versiyon: Bekleniyor...</p>
-                    <p style="font-size:0.65rem; opacity:0.5; margin-top:5px; color: #ff7b72;">* Güncelleme baslatildiginda sistem yaklasik 2 dakika devre disi kalacaktir.</p>
+                    <button id="btn-ota-main" class="btn btn-blue" style="width: 100%; margin-bottom: 10px;" onclick="denetleGuncellemeleri()">
+                        <i class="fas fa-search"></i> GÜNCELLEMELERİ DENETLE
+                    </button>
+                    <p id="ota-small-status" style="font-size: 0.7rem; color: #888; margin: 0;"></p>
+                    <p id="version-info" style="font-size:0.6rem; opacity:0.5; margin-top:10px;">Cihaz Versiyonları: Bekleniyor...</p>
                 </div>
 
             </div>
@@ -894,13 +893,55 @@
                 }
             }
             function kapatAdminPaneli() { document.getElementById('admin-panel').style.display = 'none'; }
+            let guncellenecekCihaz = null;
+
+            function denetleGuncellemeleri() {
+                const btn = document.getElementById('btn-ota-main');
+                const status = document.getElementById('ota-small-status');
+                
+                if (guncellenecekCihaz) {
+                    sistemGuncelle(guncellenecekCihaz);
+                    return;
+                }
+
+                btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Denetleniyor...';
+                status.innerText = "";
+
+                // Firebase'den mevcut versiyonları al
+                db.ref('sistem_durumu').once('value').then(snap => {
+                    const data = snap.val();
+                    const currentNode = data.versiyon || "0.0.0";
+                    const currentMega = data.versiyon_mega || "0.0.0";
+
+                    // GitHub'dan en güncel versiyonları çek
+                    fetch('https://raw.githubusercontent.com/mfatih01020/mini-sera-panel/main/version.json')
+                        .then(res => res.json())
+                        .then(remote => {
+                            if (remote.NodeMCU !== currentNode) {
+                                guncellenecekCihaz = "NodeMCU";
+                                btn.className = "btn btn-green";
+                                btn.innerHTML = '<i class="fas fa-download"></i> GÜNCELLE (NodeMCU v' + remote.NodeMCU + ')';
+                            } else if (remote.Mega !== currentMega) {
+                                guncellenecekCihaz = "Mega";
+                                btn.className = "btn btn-green";
+                                btn.innerHTML = '<i class="fas fa-download"></i> GÜNCELLE (Mega v' + remote.Mega + ')';
+                            } else {
+                                btn.innerHTML = '<i class="fas fa-search"></i> GÜNCELLEMELERİ DENETLE';
+                                status.innerText = "Güncelleme yok (Sistem Güncel)";
+                            }
+                        }).catch(err => {
+                            btn.innerHTML = '<i class="fas fa-search"></i> GÜNCELLEMELERİ DENETLE';
+                            status.innerText = "Bağlantı hatası!";
+                        });
+                });
+            }
 
             function sistemGuncelle(target) {
-                if (confirm(target + " için uzaktan güncellemeyi başlatmak istediğinize emin misiniz?\n\nBu işlem geri alınamaz ve sistem geçici olarak duracaktır.")) {
+                if (confirm(target + " için güncellemeyi başlatmak istediğinize emin misiniz?")) {
                     db.ref('sistem_durumu').update({
                         guncelleme_istegi: target,
                         guncelleme_ilerleme: 0,
-                        guncelleme_mesaj: "Güncelleme başlatılıyor...",
+                        guncelleme_mesaj: "Güncelleme hazırlanıyor...",
                         islem_durumu: "UPDATING"
                     });
                 }
@@ -1207,19 +1248,10 @@
                             updateOverlay.style.display = 'none';
                         }
 
-                        // VERSİYON KONTROLÜ
-                        const currentVer = data.sistem_durumu.versiyon || "0.0.0";
-                        document.getElementById('version-info').innerText = "Mevcut Sistem Versiyonu: " + currentVer;
-
-                        fetch('https://raw.githubusercontent.com/mfatih01020/mini-sera-panel/main/version.json')
-                            .then(response => response.json())
-                            .then(remote => {
-                                if (remote.NodeMCU !== currentVer) {
-                                    document.getElementById('node-up-badge').style.display = 'inline-block';
-                                } else {
-                                    document.getElementById('node-up-badge').style.display = 'none';
-                                }
-                            }).catch(err => console.log("Versiyon kontrol hatasi:", err));
+                        // VERSİYON BİLGİSİ GÖSTERİMİ
+                        const nodeV = data.sistem_durumu.versiyon || "---";
+                        const megaV = data.sistem_durumu.versiyon_mega || "---";
+                        document.getElementById('version-info').innerText = `Cihaz Versiyonları: NodeMCU v${nodeV} | Mega v${megaV}`;
                     }
                 });
             }
