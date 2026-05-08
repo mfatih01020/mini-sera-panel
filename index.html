@@ -324,6 +324,17 @@
         </div>
     </div>
 
+    <!-- LOG TERMİNALİ -->
+    <div class="card" style="grid-column: 1 / -1; background: #000; border: 1px solid #333; margin-top: 20px;">
+        <div class="card-header" style="border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px;">
+            <span style="color: #3fb950; font-family: monospace;"><i class="fas fa-terminal"></i> SİSTEM TERMİNALİ / GECE LOGLARI</span>
+            <button class="btn btn-red" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="temizleLoglar()">LOGLARI SİL</button>
+        </div>
+        <div id="log-terminal" style="height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #ccc; line-height: 1.4; padding: 5px;">
+            <div style="color: #666;">--- Sistem Logları Dinleniyor ---</div>
+        </div>
+    </div>
+
     <!-- GRAFİK MODALI -->
     <div id="chartModal" class="modal-overlay">
         <div class="modal-content">
@@ -507,7 +518,31 @@
         alert("Olcum tamamlandi! Kararli deger: " + avg + " cm.\nKaydetmek icin 'TUMUNU KAYDET'e basin.");
     }
 
+    function temizleLoglar() {
+        if(confirm("Tüm gece loglarını silmek istediğinize emin misiniz?")) {
+            db.ref('sistem_durumu/loglar').remove();
+            document.getElementById('log-terminal').innerHTML = '<div style="color: #666;">--- Sistem Logları Dinleniyor ---</div>';
+        }
+    }
+
     function baslatUygulama() {
+        // Logları Dinle (Terminal İçin)
+        db.ref('sistem_durumu/loglar').limitToLast(50).on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.mesaj) {
+                const term = document.getElementById('log-terminal');
+                const div = document.createElement('div');
+                const timeStr = data.zaman ? new Date(data.zaman).toLocaleTimeString('tr-TR') : '--:--:--';
+                let color = "#c9d1d9";
+                if(data.mesaj.includes("HATA") || data.mesaj.includes("ÇÖKTÜ") || data.mesaj.includes("YENİDEN BAŞLATILDI")) color = "#ff7b72";
+                if(data.mesaj.includes("✅")) color = "#3fb950";
+                
+                div.innerHTML = `<span style="color:#8b949e">[${timeStr}]</span> <span style="color:${color}">${data.mesaj}</span>`;
+                term.appendChild(div);
+                term.scrollTop = term.scrollHeight; // Auto scroll
+            }
+        });
+
         db.ref().on('value', s => {
             const data = s.val();
             if (!data) return;
