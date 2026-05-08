@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -1202,6 +1203,29 @@
                     sensorChartInstance.destroy();
                 }
 
+                // İdeal Limitleri Al (Boyama için)
+                const limitKey = sensorPath.split('_')[0]; // örn: 'ph', 'tds', 'ic'
+                const minVal = window.idealLimits ? window.idealLimits[limitKey + '_min'] : null;
+                const maxVal = window.idealLimits ? window.idealLimits[limitKey + '_max'] : null;
+
+                const annotations = {};
+                if (minVal !== null) {
+                    annotations.lowZone = {
+                        type: 'box', yMin: 0, yMax: minVal,
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        borderColor: 'rgba(255, 0, 0, 0.2)',
+                        borderWidth: 1, label: { enabled: true, content: 'DÜŞÜK', position: 'start', color: 'red', font: {size: 10} }
+                    };
+                }
+                if (maxVal !== null) {
+                    annotations.highZone = {
+                        type: 'box', yMin: maxVal, yMax: 5000, // Yüksek bir değer
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        borderColor: 'rgba(255, 0, 0, 0.2)',
+                        borderWidth: 1, label: { enabled: true, content: 'YÜKSEK', position: 'end', color: 'red', font: {size: 10} }
+                    };
+                }
+
                 sensorChartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -1222,7 +1246,8 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                            legend: { labels: { color: '#c9d1d9' } }
+                            legend: { labels: { color: '#c9d1d9' } },
+                            annotation: { annotations: annotations }
                         },
                         scales: {
                             x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
