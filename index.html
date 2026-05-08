@@ -353,7 +353,10 @@
     <div id="chartModal" class="modal-overlay">
         <div class="modal-content">
             <i class="fas fa-times modal-close" onclick="document.getElementById('chartModal').style.display='none'"></i>
-            <h3 id="chartTitle" style="color: var(--accent); margin-top: 0;"><i class="fas fa-chart-line"></i> Geçmiş Veri Grafiği</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 id="chartTitle" style="color: var(--accent); margin-top: 0; margin-bottom:0;"><i class="fas fa-chart-line"></i> Geçmiş Veri Grafiği</h3>
+                <button id="btnClearHealth" class="btn btn-red" style="padding: 5px 15px; font-size: 0.7rem; width: auto; display:none;" onclick="temizleSaglikVerileri()">VERİLERİ TEMİZLE</button>
+            </div>
             <p id="chartLoading" style="text-align:center; opacity:0.5; font-size:0.9rem;">Veriler Firebase'den Çekiliyor...</p>
             <canvas id="sensorChart" style="max-height: 400px; display: none;"></canvas>
         </div>
@@ -747,6 +750,7 @@
         document.getElementById('chartTitle').innerText = title + " Geçmiş Grafiği";
         document.getElementById('chartLoading').style.display = 'block';
         document.getElementById('sensorChart').style.display = 'none';
+        document.getElementById('btnClearHealth').style.display = 'none';
 
         // Firebase'den Verileri Çek
         const limit = parseInt(document.getElementById('cfg_grafik_limit').value || 100);
@@ -851,10 +855,11 @@
             document.getElementById('chartTitle').innerText = "Sistem Sağlık Analizi (RAM & WiFi)";
             document.getElementById('chartLoading').style.display = 'block';
             document.getElementById('sensorChart').style.display = 'none';
+            document.getElementById('btnClearHealth').style.display = 'block';
         }
 
         const limit = parseInt(document.getElementById('cfg_grafik_limit').value || 100);
-        db.ref('gecmis/sensorlar').orderByKey().limitToLast(limit).once('value')
+        db.ref('gecmis/saglik').limitToLast(limit).once('value')
         .then((snapshot) => {
             document.getElementById('chartLoading').style.display = 'none';
             document.getElementById('sensorChart').style.display = 'block';
@@ -867,8 +872,13 @@
             if (veriler) {
                 Object.keys(veriler).forEach(key => {
                     const kayit = veriler[key];
-                    if (kayit && kayit.son_guncelleme) {
-                        labels.push(kayit.son_guncelleme);
+                    if (kayit) {
+                        // Eğer saat yoksa damgadan üret
+                        let label = kayit.saat;
+                        if (!label && kayit.zaman) {
+                            label = new Date(kayit.zaman).toLocaleTimeString('tr-TR');
+                        }
+                        labels.push(label || "--:--");
                         ramData.push(kayit.bos_ram || 0);
                         wifiData.push(kayit.wifi_sinyal || 0);
                     }
@@ -932,6 +942,15 @@
             grafikSaglikGoster(true); 
         }
     }, 10000);
+
+    function temizleSaglikVerileri() {
+        if(confirm("Tüm yüksek frekanslı sağlık analiz verilerini silmek istediğinize emin misiniz?")) {
+            db.ref('gecmis/saglik').remove().then(() => {
+                alert("Sağlık geçmişi temizlendi.");
+                document.getElementById('chartModal').style.display = 'none';
+            });
+        }
+    }
 
 </script>
 </body>
