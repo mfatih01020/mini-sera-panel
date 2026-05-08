@@ -845,11 +845,13 @@
         });
     }
 
-    function grafikSaglikGoster() {
-        document.getElementById('chartModal').style.display = 'flex';
-        document.getElementById('chartTitle').innerText = "Sistem Sağlık Analizi (RAM & WiFi)";
-        document.getElementById('chartLoading').style.display = 'block';
-        document.getElementById('sensorChart').style.display = 'none';
+    function grafikSaglikGoster(isSilent = false) {
+        if (!isSilent) {
+            document.getElementById('chartModal').style.display = 'flex';
+            document.getElementById('chartTitle').innerText = "Sistem Sağlık Analizi (RAM & WiFi)";
+            document.getElementById('chartLoading').style.display = 'block';
+            document.getElementById('sensorChart').style.display = 'none';
+        }
 
         const limit = parseInt(document.getElementById('cfg_grafik_limit').value || 100);
         db.ref('gecmis/sensorlar').orderByKey().limitToLast(limit).once('value')
@@ -921,6 +923,15 @@
             });
         });
     }
+
+    // Sağlık grafiği için otomatik güncelleme (10 saniyede bir)
+    setInterval(() => {
+        const modal = document.getElementById('chartModal');
+        const title = document.getElementById('chartTitle');
+        if (modal && modal.style.display === 'flex' && title && title.innerText.includes("Sağlık Analizi")) {
+            grafikSaglikGoster(true); 
+        }
+    }, 10000);
 
 </script>
 </body>
