@@ -322,18 +322,21 @@
             </div>
 
         </div>
+        
+        <!-- LOG TERMİNALİ (Admin İçinde) -->
+        <div style="background: #000; border: 1px solid #333; margin-top: 20px; border-radius: 10px; padding: 15px;">
+            <div style="border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="color: #3fb950; font-family: monospace; font-weight:bold;"><i class="fas fa-terminal"></i> SİSTEM TERMİNALİ / GECE LOGLARI</span>
+                <button class="btn btn-red" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="temizleLoglar()">LOGLARI SİL</button>
+            </div>
+            <div id="log-terminal" style="height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #ccc; line-height: 1.4; padding: 5px;">
+                <div style="color: #666;">--- Sistem Logları Dinleniyor ---</div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- LOG TERMİNALİ -->
-    <div class="card" style="grid-column: 1 / -1; background: #000; border: 1px solid #333; margin-top: 20px;">
-        <div class="card-header" style="border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 5px;">
-            <span style="color: #3fb950; font-family: monospace;"><i class="fas fa-terminal"></i> SİSTEM TERMİNALİ / GECE LOGLARI</span>
-            <button class="btn btn-red" style="padding: 3px 10px; font-size: 0.6rem; width: auto;" onclick="temizleLoglar()">LOGLARI SİL</button>
-        </div>
-        <div id="log-terminal" style="height: 150px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; color: #ccc; line-height: 1.4; padding: 5px;">
-            <div style="color: #666;">--- Sistem Logları Dinleniyor ---</div>
-        </div>
-    </div>
+
 
     <!-- GRAFİK MODALI -->
     <div id="chartModal" class="modal-overlay">
