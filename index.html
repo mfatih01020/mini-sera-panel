@@ -896,41 +896,38 @@
             let guncellenecekCihaz = null;
 
             function denetleGuncellemeleri() {
-                const btn = document.getElementById('btn-ota-main');
+                const btnContainer = document.getElementById('btn-ota-main').parentElement;
                 const status = document.getElementById('ota-small-status');
                 
-                if (guncellenecekCihaz) {
-                    sistemGuncelle(guncellenecekCihaz);
-                    return;
-                }
+                status.innerText = "Denetleniyor...";
 
-                btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Denetleniyor...';
-                status.innerText = "";
-
-                // Firebase'den mevcut versiyonları al
                 db.ref('sistem_durumu').once('value').then(snap => {
                     const data = snap.val();
                     const currentNode = data.versiyon || "0.0.0";
                     const currentMega = data.versiyon_mega || "0.0.0";
 
-                    // GitHub'dan en güncel versiyonları çek
                     fetch('https://raw.githubusercontent.com/mfatih01020/mini-sera-panel/main/version.json')
                         .then(res => res.json())
                         .then(remote => {
+                            let updatesFound = false;
+                            let html = "";
+
                             if (remote.NodeMCU !== currentNode) {
-                                guncellenecekCihaz = "NodeMCU";
-                                btn.className = "btn btn-green";
-                                btn.innerHTML = '<i class="fas fa-download"></i> GÜNCELLE (NodeMCU v' + remote.NodeMCU + ')';
-                            } else if (remote.Mega !== currentMega) {
-                                guncellenecekCihaz = "Mega";
-                                btn.className = "btn btn-green";
-                                btn.innerHTML = '<i class="fas fa-download"></i> GÜNCELLE (Mega v' + remote.Mega + ')';
+                                html += `<button class="btn btn-green" style="width:100%; margin-bottom:5px;" onclick="sistemGuncelle('NodeMCU')"><i class="fas fa-download"></i> NodeMCU Güncelle (v${remote.NodeMCU})</button>`;
+                                updatesFound = true;
+                            }
+                            if (remote.Mega !== currentMega) {
+                                html += `<button class="btn btn-blue" style="width:100%; margin-bottom:5px;" onclick="sistemGuncelle('Mega')"><i class="fas fa-download"></i> Mega Güncelle (v${remote.Mega})</button>`;
+                                updatesFound = true;
+                            }
+
+                            if (updatesFound) {
+                                btnContainer.innerHTML = html;
+                                status.innerText = "Yeni güncellemeler bulundu!";
                             } else {
-                                btn.innerHTML = '<i class="fas fa-search"></i> GÜNCELLEMELERİ DENETLE';
-                                status.innerText = "Güncelleme yok (Sistem Güncel)";
+                                status.innerText = "Sistem güncel (v" + currentNode + ")";
                             }
                         }).catch(err => {
-                            btn.innerHTML = '<i class="fas fa-search"></i> GÜNCELLEMELERİ DENETLE';
                             status.innerText = "Bağlantı hatası!";
                         });
                 });
