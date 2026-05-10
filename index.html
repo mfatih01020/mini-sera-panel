@@ -480,7 +480,20 @@
 
             <!-- KONTROL MERKEZİ -->
             <div class="card" style="grid-column: 1 / -1;">
-                <div class="card-header"><span><i class="fas fa-gamepad"></i> KONTROL MERKEZİ (MANUEL)</span></div>
+                <div class="card-header"><span><i class="fas fa-gamepad"></i> KONTROL MERKEZİ</span></div>
+
+                <div style="background: rgba(88, 166, 255, 0.1); border: 1px solid var(--accent); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                    <span style="font-size: 1.1rem; color: white; font-weight: bold; margin-bottom: 10px; display: block;"><i class="fas fa-robot"></i> OTONOM MOD (Yapay Zeka & Sensör Kontrolü)</span>
+                    <p style="font-size: 0.8rem; color: #8b949e; margin-bottom: 15px;">Açıldığında sistem ideal değerlere göre fanları ve topraksız tarım sulamasını kendi yönetir. Manuel butonlar devre dışı kalabilir.</p>
+                    <div class="btn-group" style="max-width: 400px; margin: 0 auto;">
+                        <button id="btn_otonom_ac" class="btn btn-green" onclick="runAction('OTONOM', 1, 'btn_otonom_ac')">
+                            <div class="spinner"></div><span class="btn-text">OTONOM MODU AÇ</span>
+                        </button>
+                        <button id="btn_otonom_kapat" class="btn btn-red" onclick="runAction('OTONOM', 0, 'btn_otonom_kapat')">
+                            <div class="spinner"></div><span class="btn-text">MANUELE DÖN</span>
+                        </button>
+                    </div>
+                </div>
 
                 <div
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
