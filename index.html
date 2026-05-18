@@ -1359,25 +1359,68 @@
                     sensorChartInstance.destroy();
                 }
 
-                // İdeal Limitleri Al (Boyama için)
+                // İdeal Limitleri Al (Boyama ve Akıllı Eksen Ölçekleme İçin)
                 const minVal = (lKey && window.idealLimits) ? window.idealLimits[lKey + '_min'] : null;
                 const maxVal = (lKey && window.idealLimits) ? window.idealLimits[lKey + '_max'] : null;
+
+                let yMinVal = undefined;
+                let yMaxVal = undefined;
+
+                if (minVal !== null && maxVal !== null) {
+                    const range = (maxVal - minVal) || 10;
+                    let targetMin = minVal - (range * 0.20);
+                    let targetMax = maxVal + (range * 0.20);
+
+                    // Değerlerin eksiye düşmemesi gereken durumlar
+                    if (lKey === 'hum' || lKey === 'ph' || lKey === 'tds' || lKey === 'su' || lKey === 'st') {
+                        if (targetMin < 0) targetMin = 0;
+                    }
+
+                    // Eğer gerçek veriler bu varsayılan %20 aralığını aşıyorsa otomatik uzaklaştır (Zoom-out)
+                    const validPoints = dataPoints.filter(val => val !== null && val !== undefined);
+                    if (validPoints.length > 0) {
+                        const actualMin = Math.min(...validPoints);
+                        const actualMax = Math.max(...validPoints);
+
+                        if (actualMin < targetMin) {
+                            targetMin = actualMin - (range * 0.10);
+                            if ((lKey === 'hum' || lKey === 'ph' || lKey === 'tds' || lKey === 'su' || lKey === 'st') && targetMin < 0) {
+                                targetMin = 0;
+                            }
+                        }
+                        if (actualMax > targetMax) {
+                            targetMax = actualMax + (range * 0.10);
+                        }
+                    }
+
+                    yMinVal = targetMin;
+                    yMaxVal = targetMax;
+                } else if (isPercentage) {
+                    yMinVal = 0;
+                    yMaxVal = 100;
+                }
 
                 const annotations = {};
                 if (minVal !== null) {
                     annotations.lowZone = {
-                        type: 'box', yMin: 0, yMax: minVal,
+                        type: 'box', 
+                        yMin: yMinVal !== undefined ? yMinVal : 0, 
+                        yMax: minVal,
                         backgroundColor: 'rgba(255, 0, 0, 0.1)',
                         borderColor: 'rgba(255, 0, 0, 0.2)',
-                        borderWidth: 1, label: { enabled: true, content: 'DÜŞÜK', position: 'start', color: 'red', font: {size: 10} }
+                        borderWidth: 1, 
+                        label: { enabled: true, content: 'DÜŞÜK', position: 'start', color: 'red', font: {size: 10} }
                     };
                 }
                 if (maxVal !== null) {
                     annotations.highZone = {
-                        type: 'box', yMin: maxVal, yMax: isPercentage ? 100 : 5000,
+                        type: 'box', 
+                        yMin: maxVal, 
+                        yMax: yMaxVal !== undefined ? yMaxVal : (isPercentage ? 100 : 5000),
                         backgroundColor: 'rgba(255, 0, 0, 0.1)',
                         borderColor: 'rgba(255, 0, 0, 0.2)',
-                        borderWidth: 1, label: { enabled: true, content: 'YÜKSEK', position: 'end', color: 'red', font: {size: 10} }
+                        borderWidth: 1, 
+                        label: { enabled: true, content: 'YÜKSEK', position: 'end', color: 'red', font: {size: 10} }
                     };
                 }
 
@@ -1414,8 +1457,8 @@
                             scales: {
                                 x: { ticks: { color: '#8b949e', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } },
                                 y: { 
-                                    min: isPercentage ? 0 : undefined,
-                                    max: isPercentage ? 100 : undefined,
+                                    min: yMinVal,
+                                    max: yMaxVal,
                                     ticks: { color: '#8b949e' }, 
                                     grid: { color: 'rgba(255,255,255,0.05)' } 
                                 }
